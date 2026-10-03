@@ -1,0 +1,1359 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+
+/* ==========================================================================
+   STITCH DESIGN SYSTEM: BRIDAL OPULENCE & PRECISION (MARCOS SPK UI)
+   Haute Couture Editorial Luxury meets Analytical Decision Science
+   ========================================================================== */
+
+:root {
+  /* Stitch Canonical Palette */
+  --primary: #775A19;
+  --primary-container: #C5A059;
+  --primary-fixed: #FFDEA5;
+  --primary-fixed-dim: #E9C176;
+  --on-primary: #FFFFFF;
+  --on-primary-container: #4E3700;
+
+  --secondary: #50625E;
+  --secondary-container: #D3E7E2;
+  --secondary-fixed: #D3E7E2;
+  --on-secondary: #FFFFFF;
+  --emerald-deep: #1A2B28; /* Authority, Hero CTAs, Structural Navigation */
+
+  --tertiary: #735853;
+  --tertiary-container: #BE9E97;
+  --tertiary-fixed: #FFDAD3;
+  --blush-accent: #E8C5BE;
+  --blush-light: #FAF2F0;
+
+  --background: #FAF8F5; /* Warm Alabaster Canvas */
+  --surface: #FAF8F5;
+  --surface-lowest: #FFFFFF; /* Pure Porcelain for Cards */
+  --surface-low: #F5F3F0;
+  --surface-container: #EFEEEB;
+  --surface-high: #EAE8E5;
+  --surface-highest: #E4E2DF;
+
+  --on-surface: #1B1C1A; /* Deep Slate Charcoal */
+  --on-surface-variant: #4E4639;
+  --outline: #7F7667;
+  --outline-variant: #D1C5B4;
+  --border-gold-subtle: rgba(197, 160, 89, 0.22);
+  --border-gold-medium: rgba(197, 160, 89, 0.45);
+
+  /* MARCOS Ranking Badges */
+  --rank-1: #C5A059;
+  --rank-2: #94A3B8;
+  --rank-3: #CD7F32;
+
+  --error: #BA1A1A;
+  --error-container: #FFDAD6;
+  --success: #1E6B52;
+  --success-bg: #E8F5EF;
+
+  /* Editorial & Layout Tokens */
+  --ink: #1B1C1A;
+  --body: #4E4639;
+  --muted: #7F7667;
+  --cream: #FAF8F5;
+  --line: #E5E7EB;
+  --moss: #1A2B28;
+  --rust: #775A19;
+
+  /* Typography */
+  --font-heading: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-main: var(--font-body);
+
+  /* Spacing Scale */
+  --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px;
+  --s-5: 20px; --s-6: 28px; --s-7: 48px; --s-8: 72px;
+
+  /* Stitch Depth Tiers */
+  --shadow-tier1: 0 4px 20px -4px rgba(26, 43, 40, 0.04), 0 2px 6px -1px rgba(197, 160, 89, 0.06);
+  --shadow-tier2: 0 12px 32px -6px rgba(26, 43, 40, 0.08), 0 4px 12px -2px rgba(197, 160, 89, 0.12);
+  --shadow-tier3: 0 24px 48px -12px rgba(26, 43, 40, 0.16);
+
+  /* Compatibility Mapping with existing Blade views */
+  --ink: #1B1C1A;
+  --cream: #FAF8F5;
+  --paper: #FFFFFF;
+  --moss: #1A2B28;
+  --rust: #C5A059;
+  --line: rgba(197, 160, 89, 0.22);
+  --muted: #50625E;
+  --body: #374151;
+
+  --color-primary: #1A2B28;
+  --color-primary-gold: #C5A059;
+  --color-secondary: #50625E;
+  --color-tertiary: #FAF8F5;
+  --color-neutral: #FFFFFF;
+  --color-surface: #FAF8F5;
+  --color-on-surface: #1B1C1A;
+  --color-accent: #C5A059;
+  --color-highlight: #C5A059;
+  --color-border: rgba(197, 160, 89, 0.22);
+  --color-border-strong: rgba(197, 160, 89, 0.45);
+  --color-muted: rgba(26, 43, 40, 0.04);
+  --color-success: #E8F5EF;
+  --color-success-text: #1E6B52;
+  --color-warning: #FFF8E6;
+  --color-warning-text: #8C6B28;
+  --color-error: #BA1A1A;
+  --color-error-bg: #FEECEB;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  --rounded-none: 0px;
+  --rounded-sm: 4px;
+  --rounded-md: 8px;
+  --rounded-lg: 12px;
+  --rounded-xl: 16px;
+  --rounded-full: 9999px;
+
+  --container: 1240px;
+}
+
+/* ==========================================================================
+   RESET & FOUNDATIONS
+   ========================================================================== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+  background-color: var(--background);
+  color: var(--body);
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Headings: Haute Couture Editorial Serif (Playfair Display) */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  color: var(--ink);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+}
+
+.headline-display {
+  font-family: var(--font-heading);
+  font-size: clamp(32px, 4vw, 48px);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.headline-lg {
+  font-family: var(--font-heading);
+  font-size: clamp(24px, 3vw, 34px);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--ink);
+}
+
+.headline-md {
+  font-family: var(--font-heading);
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--ink);
+}
+
+.headline-sm {
+  font-family: var(--font-heading);
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--ink);
+}
+
+.body-lg {
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--on-surface-variant);
+}
+
+.body-md {
+  font-family: var(--font-body);
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--body);
+}
+
+.body-sm {
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.caption {
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+code {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 12px;
+  background-color: var(--surface-container);
+  color: var(--primary);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--border-gold-subtle);
+}
+
+/* Material Symbols Integration */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 20px;
+  line-height: 1;
+  display: inline-block;
+  vertical-align: middle;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+}
+
+/* Containers */
+.container {
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.container-wide {
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.container-narrow {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+/* ==========================================================================
+   NAVIGATION BAR (STITCH EDITORIAL FROSTED GLASS)
+   ========================================================================== */
+.header-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(251, 249, 246, 0.94);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border-gold-subtle);
+  transition: all 0.3s ease;
+}
+
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 68px;
+  gap: 16px;
+}
+
+.logo-brand {
+  font-family: var(--font-heading);
+  font-size: 21px;
+  font-weight: 700;
+  color: var(--emerald-deep);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  letter-spacing: -0.01em;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.logo-brand:hover {
+  color: var(--primary);
+}
+
+.logo-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FFDEA5 0%, #C5A059 100%);
+  display: inline-block;
+  box-shadow: 0 0 8px rgba(197, 160, 89, 0.6);
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex-wrap: nowrap;
+}
+
+@media (max-width: 1200px) {
+  .nav-links {
+    gap: 12px;
+  }
+}
+
+.nav-link {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  padding: 8px 4px;
+  position: relative;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.nav-link:hover {
+  color: var(--emerald-deep);
+}
+
+.nav-link.active {
+  color: var(--emerald-deep);
+  font-weight: 600;
+}
+
+.nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--primary-container);
+  border-radius: 2px;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   BUTTONS (STITCH BRIDAL OPULENCE)
+   ========================================================================== */
+.btn {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 18px;
+  height: 38px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+/* Primary: Deep Heritage Emerald with Champagne Highlight */
+.btn-primary {
+  background-color: var(--emerald-deep);
+  color: #FAF8F5 !important;
+  border: 1px solid var(--border-gold-medium);
+  box-shadow: 0 2px 8px rgba(26, 43, 40, 0.12);
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-container);
+  color: var(--emerald-deep) !important;
+  border-color: var(--primary-container);
+  box-shadow: 0 8px 24px -4px rgba(197, 160, 89, 0.45);
+  transform: translateY(-1px);
+}
+
+/* Secondary: Crisp Porcelain with Gold Border */
+.btn-secondary {
+  background-color: #FFFFFF;
+  color: var(--emerald-deep);
+  border: 1px solid var(--border-gold-medium);
+  box-shadow: var(--shadow-tier1);
+}
+
+.btn-secondary:hover {
+  background-color: #FAF6F2;
+  color: var(--primary);
+  border-color: var(--primary-container);
+  box-shadow: var(--shadow-tier2);
+  transform: translateY(-1px);
+}
+
+/* Tertiary: Ghost Action */
+.btn-tertiary {
+  background: transparent;
+  color: var(--emerald-deep);
+  border: none;
+  padding: 0 8px;
+}
+
+.btn-tertiary:hover {
+  color: var(--primary);
+}
+
+.btn-accent {
+  background: linear-gradient(135deg, #F5E5C9 0%, #C5A059 100%);
+  color: var(--emerald-deep);
+  border: 1px solid #C5A059;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(197, 160, 89, 0.35);
+}
+
+.btn-accent:hover {
+  background: linear-gradient(135deg, #FFDEA5 0%, #E9C176 100%);
+  box-shadow: 0 6px 20px rgba(197, 160, 89, 0.5);
+  transform: translateY(-1px);
+}
+
+.btn-sm {
+  height: 32px;
+  padding: 0 14px;
+  font-size: 12px;
+}
+
+.btn-lg {
+  height: 46px;
+  padding: 0 26px;
+  font-size: 14.5px;
+}
+
+/* ==========================================================================
+   CARDS & CONTAINERS (STITCH PORCELAIN & DEPTH TIERS)
+   ========================================================================== */
+.card-dribbble,
+.card-minimal,
+.card-kabut,
+.card {
+  background: #FFFFFF;
+  border: 1px solid var(--border-gold-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-tier1);
+  transition: all 0.28s ease;
+  overflow: hidden;
+  padding: 24px;
+}
+
+.card-dribbble:hover,
+.card:hover {
+  border-color: var(--border-gold-medium);
+  box-shadow: var(--shadow-tier2);
+  transform: translateY(-2px);
+}
+
+.card-quiet {
+  background: var(--surface);
+  border: 1px solid var(--border-gold-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: none;
+}
+
+.section-paper {
+  background-color: var(--surface);
+  padding: 56px 0;
+  border-top: 1px solid var(--border-gold-subtle);
+  border-bottom: 1px solid var(--border-gold-subtle);
+}
+
+/* ==========================================================================
+   BADGES, CHIPS & STATUS PILLS
+   ========================================================================== */
+.badge {
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  line-height: 1.3;
+}
+
+.badge-primary {
+  background: var(--emerald-deep);
+  color: #FAF8F5;
+}
+
+.badge-accent {
+  background: linear-gradient(135deg, #FDF9F0 0%, #F5E7CD 100%);
+  color: #775A19;
+  border: 1px solid var(--primary-container);
+}
+
+.badge-moss {
+  background: var(--secondary-container);
+  color: var(--emerald-deep);
+}
+
+.badge-outline {
+  background: #FFFFFF;
+  border: 1px solid var(--border-gold-medium);
+  color: var(--primary);
+}
+
+.badge-muted {
+  background: var(--surface-container);
+  color: var(--muted);
+  border: 1px solid rgba(0,0,0,0.04);
+}
+
+.badge-success {
+  background: var(--success-bg);
+  color: var(--success);
+  border: 1px solid rgba(30, 107, 82, 0.2);
+}
+
+.badge-amber,
+.badge-warning {
+  background: var(--color-warning);
+  color: var(--color-warning-text);
+  border: 1px solid rgba(197, 160, 89, 0.3);
+}
+
+.badge-danger {
+  background: var(--color-error-bg);
+  color: var(--error);
+  border: 1px solid rgba(186, 26, 26, 0.2);
+}
+
+/* Rank Badges */
+.rank-badge-1 {
+  background: linear-gradient(135deg, #FDF9F0 0%, #F5E7CD 100%);
+  border: 1px solid #C5A059;
+  color: #775A19;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(197, 160, 89, 0.25);
+}
+
+.rank-badge-2 {
+  background: linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 100%);
+  border: 1px solid #94A3B8;
+  color: #475569;
+  font-weight: 700;
+}
+
+.rank-badge-3 {
+  background: linear-gradient(135deg, #FAF6F5 0%, #F0DCD8 100%);
+  border: 1px solid #CD7F32;
+  color: #78350F;
+  font-weight: 700;
+}
+
+/* Chips / Sub-navigation */
+.chip {
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  background: #FFFFFF;
+  color: var(--muted);
+  border: 1px solid var(--border-gold-subtle);
+  border-radius: var(--radius-full);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.chip:hover {
+  border-color: var(--primary-container);
+  color: var(--emerald-deep);
+  background: #FAF8F5;
+}
+
+.chip.active {
+  background: var(--emerald-deep);
+  color: #FAF8F5;
+  border-color: var(--emerald-deep);
+  box-shadow: 0 3px 10px rgba(26, 43, 40, 0.16);
+}
+
+/* ==========================================================================
+   FORM INPUTS & SELECTS (STITCH TAILORED FIELDS)
+   ========================================================================== */
+.form-input,
+.form-select,
+.input-pill,
+.select-pill,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+select,
+textarea {
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  width: 100%;
+  height: 42px;
+  padding: 0 16px;
+  background: #FFFFFF;
+  color: var(--ink);
+  border: 1px solid #E5E7EB;
+  border-radius: var(--radius-full);
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+select option,
+.form-select option {
+  background-color: #FFFFFF !important;
+  color: #1B1C1A !important;
+  font-size: 13.5px;
+  font-weight: 500;
+  padding: 8px 14px;
+}
+
+textarea {
+  height: auto;
+  min-height: 90px;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+}
+
+.form-input:focus,
+.form-select:focus,
+.input-pill:focus,
+.select-pill:focus,
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--primary-container);
+  box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.25);
+  background-color: #FFFFFF;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-label {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--on-surface-variant);
+  margin-bottom: 6px;
+}
+
+/* Filter Bar Kabut / Stitch */
+.filter-bar-kabut {
+  background: #FFFFFF;
+  border: 1px solid var(--border-gold-subtle);
+  border-radius: var(--radius-xl);
+  padding: 16px 20px;
+  box-shadow: var(--shadow-tier1);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+}
+
+.filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.filter-item label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ==========================================================================
+   TABLES & MARCOS DECISION MATRICES
+   ========================================================================== */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-dribbble,
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13.5px;
+  color: var(--body);
+}
+
+.table-dribbble th,
+table th {
+  background: #F8F6F2;
+  color: var(--emerald-deep);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 12.5px;
+  letter-spacing: 0.02em;
+  padding: 13px 16px;
+  border-bottom: 2px solid var(--emerald-deep);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.table-dribbble td,
+table td {
+  padding: 13px 16px;
+  border-bottom: 1px solid rgba(197, 160, 89, 0.15);
+  background: #FFFFFF;
+  vertical-align: middle;
+  font-variant-numeric: tabular-nums;
+}
+
+.table-dribbble tbody tr:hover td,
+table tbody tr:hover td {
+  background: #FAF8F4;
+}
+
+.table-dribbble tbody tr:last-child td,
+table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* ==========================================================================
+   MATHEMATICAL FORMULA CARDS & HELPER
+   ========================================================================== */
+.btn-formula-info {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--surface-container);
+  color: var(--primary);
+  border: 1px solid var(--border-gold-medium);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 8px;
+  transition: all 0.2s;
+}
+
+.btn-formula-info:hover {
+  background: var(--primary-container);
+  color: #FFFFFF;
+}
+
+.formula-card-popup {
+  display: none;
+  background: #FDFBF7;
+  border: 1px solid var(--primary-container);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-tier1);
+}
+
+.formula-card-popup.show {
+  display: block;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.formula-math {
+  font-family: 'Times New Roman', serif;
+  font-size: 15px;
+  color: var(--emerald-deep);
+  padding: 8px 12px;
+  background: #FFFFFF;
+  border-radius: var(--radius-sm);
+  margin: 6px 0;
+  border: 1px dashed var(--border-gold-medium);
+}
+
+/* ==========================================================================
+   ANIMATED LOGOUT POPUP MODAL (STITCH LUXURY BRIDAL STYLE)
+   ========================================================================== */
+.modal-backdrop-luxury {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: rgba(26, 43, 40, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  opacity: 0;
+  transition: opacity 0.25s ease-out;
+}
+
+.modal-backdrop-luxury.active {
+  opacity: 1;
+}
+
+.modal-box-luxury {
+  background: #FFFFFF;
+  width: 100%;
+  max-width: 440px;
+  border: 1px solid var(--border-gold-medium);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-tier3);
+  padding: 32px 28px;
+  text-align: center;
+  transform: scale(0.92);
+  transition: transform 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.modal-backdrop-luxury.active .modal-box-luxury {
+  transform: scale(1);
+}
+
+.modal-icon-luxury {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FDF9F0 0%, #F5E7CD 100%);
+  border: 1px solid var(--primary-container);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  box-shadow: 0 4px 14px rgba(197, 160, 89, 0.25);
+}
+
+.modal-title-luxury {
+  font-family: var(--font-heading);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--emerald-deep);
+  margin-bottom: 8px;
+}
+
+.modal-desc-luxury {
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  color: var(--on-surface-variant);
+  line-height: 1.55;
+  margin-bottom: 24px;
+}
+
+.modal-actions-luxury {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+/* ==========================================================================
+   EXCEL VIEWER & SPREADSHEET MODAL (MICROSOFT EXCEL SUITE AESTHETIC)
+   ========================================================================== */
+.excel-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(26, 43, 40, 0.6);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.excel-modal-backdrop.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.excel-window {
+  background: #FFFFFF;
+  width: 100%;
+  max-width: 1100px;
+  max-height: 88vh;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #107C41;
+  transform: scale(0.95);
+  transition: transform 0.25s ease;
+}
+
+.excel-modal-backdrop.active .excel-window {
+  transform: scale(1);
+}
+
+.excel-titlebar {
+  background: #107C41; /* Microsoft Excel Brand Green */
+  color: #FFFFFF;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.excel-ribbon {
+  background: #F3F2F1;
+  border-bottom: 1px solid #D2D0CE;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.excel-formula-bar {
+  background: #FFFFFF;
+  border-bottom: 1px solid #E1DFDD;
+  padding: 6px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 12.5px;
+}
+
+.excel-formula-name {
+  font-weight: 700;
+  color: #323130;
+  border-right: 1px solid #D2D0CE;
+  padding-right: 10px;
+  min-width: 48px;
+  text-align: center;
+}
+
+.excel-formula-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 12.5px;
+  background: transparent;
+  color: #201F1E;
+}
+
+.excel-grid-container {
+  flex: 1;
+  overflow: auto;
+  background: #FFFFFF;
+}
+
+.excel-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 12px;
+}
+
+.excel-table th {
+  background: #F3F2F1;
+  color: #605E5C;
+  font-weight: 600;
+  text-align: center;
+  border: 1px solid #D2D0CE;
+  padding: 5px 10px;
+  user-select: none;
+}
+
+.excel-table th.excel-row-header {
+  width: 44px;
+  background: #EDEBE9;
+  color: #323130;
+}
+
+.excel-table td {
+  border: 1px solid #E1DFDD;
+  padding: 6px 10px;
+  color: #201F1E;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.excel-table tr:hover td {
+  background: #F3F9F5;
+}
+
+.excel-table td.selected {
+  outline: 2px solid #107C41;
+  background: #E8F4EC !important;
+}
+
+.excel-sheet-footer {
+  background: #F3F2F1;
+  border-top: 1px solid #D2D0CE;
+  padding: 6px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.excel-sheet-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 14px;
+  background: #FFFFFF;
+  border: 1px solid #D2D0CE;
+  border-bottom: 2px solid #107C41;
+  font-size: 12px;
+  font-weight: 600;
+  color: #107C41;
+  border-radius: 3px 3px 0 0;
+  cursor: pointer;
+}
+
+/* ==========================================================================
+   FOOTER (STITCH EDITORIAL HAUTE LUXURY)
+   ========================================================================== */
+.footer-kabut {
+  background: #F4EFEB;
+  border-top: 1px solid var(--border-gold-subtle);
+  padding: 54px 0 28px;
+  color: var(--on-surface-variant);
+}
+
+.footer-inner {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 36px;
+  margin-bottom: 40px;
+}
+
+@media (max-width: 900px) {
+  .footer-inner {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .footer-inner {
+    grid-template-columns: 1fr;
+  }
+}
+
+.footer-col h4 {
+  font-family: var(--font-heading);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--emerald-deep);
+  margin-bottom: 14px;
+}
+
+.footer-links {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.footer-links li a {
+  font-size: 13px;
+  color: var(--muted);
+  transition: color 0.2s;
+}
+
+.footer-links li a:hover {
+  color: var(--primary);
+}
+
+.footer-bottom {
+  padding-top: 24px;
+  border-top: 1px solid rgba(197, 160, 89, 0.18);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ==========================================================================
+   UTILITY KEYFRAMES
+   ========================================================================== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmerGold {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ==========================================================================
+   E-COMMERCE STANDARD PRODUCT CARDS & PROPORTIONAL GRIDS
+   Compact, clean, perfectly sized e-commerce catalog cards (Tokopedia / Shopee style)
+   ========================================================================== */
+.grid-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-bottom: 36px;
+}
+
+@media (max-width: 1120px) {
+  .grid-cards {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .grid-cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .grid-cards {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+}
+
+/* Product Card Shell */
+.product-card {
+  background: #FFFFFF;
+  border: 1px solid rgba(197, 160, 89, 0.22);
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 8px rgba(26, 43, 40, 0.04);
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+  height: 100%;
+  position: relative;
+}
+
+.product-card:hover {
+  border-color: rgba(197, 160, 89, 0.55);
+  box-shadow: 0 8px 20px -2px rgba(26, 43, 40, 0.1), 0 3px 8px -1px rgba(197, 160, 89, 0.12);
+  transform: translateY(-2px);
+}
+
+/* Proportional E-Commerce Media Box (Strictly Sized, Not Oversized) */
+.product-card__media,
+.card-media-box {
+  position: relative;
+  width: 100%;
+  height: 170px;
+  max-height: 170px;
+  overflow: hidden;
+  background: #FAF8F5;
+  display: block;
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(197, 160, 89, 0.12);
+}
+
+@media (max-width: 768px) {
+  .product-card__media,
+  .card-media-box {
+    height: 145px;
+    max-height: 145px;
+  }
+}
+
+.product-card__media img,
+.card-media-box img,
+.product-card .img-cover-box {
+  width: 100%;
+  height: 100% !important;
+  max-height: 170px !important;
+  object-fit: cover !important;
+  display: block;
+  transition: transform 0.35s ease;
+}
+
+@media (max-width: 768px) {
+  .product-card__media img,
+  .card-media-box img,
+  .product-card .img-cover-box {
+    max-height: 145px !important;
+  }
+}
+
+.product-card:hover .product-card__media img,
+.product-card:hover .card-media-box img,
+.product-card:hover .img-cover-box {
+  transform: scale(1.04);
+}
+
+/* Product Card Content Body */
+.product-card__body {
+  padding: 12px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+/* Store / Vendor Metadata */
+.product-card__store,
+.product-card .caption {
+  font-size: 11px;
+  color: #50625E;
+  margin-bottom: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Product Titles - 2 Lines Clamp */
+.product-card__name {
+  font-family: var(--font-body) !important;
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+  color: #1B1C1A !important;
+  line-height: 1.4 !important;
+  height: 38px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 6px !important;
+}
+
+.product-card__name a {
+  color: #1B1C1A;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.product-card__name a:hover {
+  color: #775A19;
+}
+
+/* Product Descriptions - 2 Lines Clamp */
+.product-card__desc {
+  font-size: 11.5px !important;
+  color: #6E6D7A !important;
+  line-height: 1.45 !important;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 8px !important;
+  height: 34px;
+}
+
+/* Price & Action Footer */
+.product-card__footer {
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid rgba(197, 160, 89, 0.15);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.product-card__footer .price,
+.product-card .price {
+  font-family: var(--font-body);
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #1A2B28;
+  letter-spacing: -0.01em;
+}
+
+.product-card__footer .btn {
+  font-size: 11.5px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+/* Badges for E-commerce Products */
+.badge-narrative-gold {
+  background: linear-gradient(135deg, #FDF9F0 0%, #F5E7CD 100%);
+  color: #775A19;
+  border: 1px solid #C5A059;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  box-shadow: 0 2px 6px rgba(197, 160, 89, 0.2);
+}
+
+.badge-narrative-moss {
+  background: #D3E7E2;
+  color: #1A2B28;
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.badge-narrative-soft {
+  background: rgba(255, 255, 255, 0.94);
+  color: #50625E;
+  border: 1px solid rgba(197, 160, 89, 0.3);
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+}
+
