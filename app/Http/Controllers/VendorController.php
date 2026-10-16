@@ -216,11 +216,30 @@ class VendorController extends Controller
     {
         $vendor = $this->getVendor();
         $orders = $vendor->orders()
-            ->with(['customer', 'bundling', 'payment', 'review'])
+            ->with(['customer', 'bundling', 'payment', 'review', 'items'])
+            ->whereIn('status', ['pending', 'approved', 'paid'])
             ->latest()
             ->paginate(10);
 
-        return view('vendor.orders', compact('vendor', 'orders'));
+        $activeCount = $vendor->orders()->whereIn('status', ['pending', 'approved', 'paid'])->count();
+        $historyCount = $vendor->orders()->whereIn('status', ['completed', 'cancelled'])->count();
+
+        return view('vendor.orders', compact('vendor', 'orders', 'activeCount', 'historyCount'));
+    }
+
+    public function ordersHistory()
+    {
+        $vendor = $this->getVendor();
+        $orders = $vendor->orders()
+            ->with(['customer', 'bundling', 'payment', 'review', 'items'])
+            ->whereIn('status', ['completed', 'cancelled'])
+            ->latest()
+            ->paginate(10);
+
+        $activeCount = $vendor->orders()->whereIn('status', ['pending', 'approved', 'paid'])->count();
+        $historyCount = $vendor->orders()->whereIn('status', ['completed', 'cancelled'])->count();
+
+        return view('vendor.orders-history', compact('vendor', 'orders', 'activeCount', 'historyCount'));
     }
 
     public function updateOrderStatus(Request $request, $id)

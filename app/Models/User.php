@@ -67,6 +67,16 @@ class User extends Authenticatable
         return $this->hasMany(Review::class, 'customer_id');
     }
 
+    public function cartItems(): HasMany
+    {
+        return $this->hasMany(CartItem::class, 'user_id');
+    }
+
+    public function chatConversations(): HasMany
+    {
+        return $this->hasMany(ChatConversation::class, 'customer_id');
+    }
+
     public function getWhatsappNumberAttribute(): string
     {
         $phone = preg_replace('/[^0-9]/', '', $this->phone ?? '');
@@ -81,5 +91,29 @@ class User extends Authenticatable
     public function getWhatsappUrlAttribute(): string
     {
         return 'https://wa.me/' . $this->whatsapp_number;
+    }
+
+    public function unreadChatCount(): int
+    {
+        if ($this->isCustomer()) {
+            return ChatMessage::whereHas('conversation', function ($q) {
+                $q->where('customer_id', $this->id);
+            })->where('sender_id', '!=', $this->id)
+              ->where('is_read', false)
+              ->count();
+        }
+
+        if ($this->isVendor()) {
+            $vendorId = $this->vendor?->id;
+            if (!$vendorId) return 0;
+
+            return ChatMessage::whereHas('conversation', function ($q) use ($vendorId) {
+                $q->where('vendor_id', $vendorId);
+            })->where('sender_id', '!=', $this->id)
+              ->where('is_read', false)
+              ->count();
+        }
+
+        return 0;
     }
 }

@@ -1357,3 +1357,589 @@ table tbody tr:last-child td {
   align-items: center;
 }
 
+/* Minimalist Navigation & Active Button */
+.btn-active {
+  background-color: var(--primary) !important;
+  color: #FFFFFF !important;
+  border-color: var(--primary) !important;
+}
+
+.btn-active i,
+.btn-active span {
+  color: #FFFFFF !important;
+}
+
+/* ==========================================================================
+   ADMIN & EDIT POPUP MODALS (DIRECT, SOLID, NO GHOST CLOSING)
+   ========================================================================== */
+.admin-modal-backdrop {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background-color: rgba(15, 23, 42, 0.65) !important;
+  backdrop-filter: blur(5px) !important;
+  -webkit-backdrop-filter: blur(5px) !important;
+  z-index: 99999 !important;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px !important;
+  opacity: 1 !important;
+  overflow-y: auto !important;
+}
+
+.admin-modal-backdrop.show {
+  display: flex !important;
+}
+
+.admin-modal-box {
+  background: #FFFFFF !important;
+  border-radius: 16px !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35) !important;
+  border: 1px solid rgba(197, 160, 89, 0.4) !important;
+  width: 100% !important;
+  max-width: 540px !important;
+  max-height: 90vh !important;
+  overflow-y: auto !important;
+  padding: 28px !important;
+  position: relative !important;
+  margin: auto !important;
+  animation: adminModalIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+@keyframes adminModalIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* ==========================================================================
+   RESPONSIVE NAVBAR & HAMBURGER DRAWER (TOMBOL GARIS TIGA)
+   ========================================================================== */
+.header-nav .container-wide {
+  max-width: 1440px !important;
+  padding: 0 20px !important;
+}
+
+.header-nav .nav-inner {
+  height: 62px !important;
+  gap: 10px !important;
+}
+
+.header-nav .nav-links {
+  gap: 4px !important;
+}
+
+.header-nav .nav-link {
+  font-size: 12px !important;
+  padding: 6px 8px !important;
+  border-radius: 6px !important;
+  white-space: nowrap !important;
+}
+
+.header-nav .nav-link:hover,
+.header-nav .nav-link.active {
+  background: rgba(26, 43, 40, 0.04);
+}
+
+.header-nav .nav-link.active::after {
+  display: none !important;
+}
+
+/* Tombol Garis Tiga (Hamburger Toggle) */
+.nav-toggle-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid var(--border-gold-subtle);
+  color: var(--emerald-deep);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.nav-toggle-btn:hover {
+  background: rgba(26, 43, 40, 0.05);
+  border-color: var(--primary);
+}
+
+/* Drawer Offcanvas Menu */
+.nav-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 99990;
+  display: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.nav-drawer-backdrop.open {
+  display: block;
+  opacity: 1;
+}
+
+.nav-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 320px;
+  max-width: 85vw;
+  height: 100vh;
+  background: #FFFFFF;
+  box-shadow: -8px 0 24px rgba(0, 0, 0, 0.15);
+  z-index: 99995;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow-y: auto;
+}
+
+.nav-drawer-backdrop.open .nav-drawer {
+  transform: translateX(0);
+}
+
+.nav-drawer-header {
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-drawer-body {
+  padding: 16px 20px;
+  flex: 1;
+}
+
+.nav-drawer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.nav-drawer-item a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--ink);
+  font-weight: 500;
+  font-size: 13.5px;
+  transition: all 0.15s ease;
+}
+
+.nav-drawer-item a:hover,
+.nav-drawer-item a.active {
+  background: rgba(197, 160, 89, 0.12);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.nav-drawer-footer {
+  padding: 18px 20px;
+  border-top: 1px solid var(--line);
+  background: var(--surface-low);
+}
+
+/* Media Query: Tampilkan tombol garis tiga pada layar <= 1300px */
+@media (max-width: 1300px) {
+  .header-nav .nav-desktop {
+    display: none !important;
+  }
+  .nav-toggle-btn {
+    display: inline-flex !important;
+  }
+}
+
+@media (min-width: 1301px) {
+  .nav-drawer-backdrop {
+    display: none !important;
+  }
+}
+
+/* Chat Balon Unread Red Dot Notification Badge */
+.nav-chat-badge-dot {
+  position: absolute;
+  top: 1px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #EF4444;
+  box-shadow: 0 0 0 2px #FFFFFF, 0 0 6px rgba(239, 68, 68, 0.75);
+  display: inline-block;
+  animation: pulseChatDot 2s infinite ease-in-out;
+}
+
+@keyframes pulseChatDot {
+  0% { transform: scale(0.9); opacity: 0.85; }
+  50% { transform: scale(1.25); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.85; }
+}
+
+/* ==========================================================================
+   HYBRID INSTANT FILTER SYSTEM (PILLS + COLLAPSIBLE SIDEBAR DRAWER)
+   Desain Editorial Mewah, Bersih, Auto-Filter Tanpa Tombol Terapkan
+   ========================================================================== */
+
+.filter-hybrid-container {
+  max-width: 860px;
+  margin: 0 auto 28px;
+  text-align: left;
+}
+
+/* 1. Baris Search Bar Modern */
+.filter-search-box {
+  display: flex;
+  align-items: center;
+  background: #FFFFFF;
+  border: 1.5px solid var(--border-gold-medium);
+  border-radius: 9999px;
+  padding: 6px 8px 6px 18px;
+  box-shadow: var(--shadow-tier1);
+  transition: all 0.25s ease;
+  margin-bottom: 16px;
+}
+
+.filter-search-box:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 4px 20px -2px rgba(119, 90, 25, 0.18);
+}
+
+.filter-search-box input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  color: var(--ink);
+  background: transparent;
+  padding: 8px 12px 8px 8px;
+  font-family: inherit;
+}
+
+.filter-search-box input::placeholder {
+  color: #9CA3AF;
+  font-size: 13.5px;
+}
+
+/* 2. Baris Kategori Layanan (Capsule / Pill Bar Horizontal) */
+.category-pills-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 2px 12px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.category-pills-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.category-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 9999px;
+  border: 1px solid var(--border-gold-subtle);
+  background: #FFFFFF;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+
+.category-pill-btn:hover {
+  border-color: var(--primary);
+  background: var(--surface-container);
+  transform: translateY(-1px);
+}
+
+.category-pill-btn.active {
+  background: var(--emerald-deep);
+  color: #FFFFFF;
+  border-color: var(--emerald-deep);
+  font-weight: 600;
+  box-shadow: 0 4px 14px rgba(26, 43, 40, 0.18);
+}
+
+.category-pill-btn.active i,
+.category-pill-btn.active svg {
+  color: #FFDEA5 !important;
+}
+
+/* 3. Baris Prioritas Kebutuhan MARCOS (Multi-Select Chips + Drawer Trigger) */
+.priority-chips-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-top: 4px;
+}
+
+.priority-chips-list {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.priority-chip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 13px;
+  border-radius: 9999px;
+  border: 1px solid var(--line);
+  background: #FFFFFF;
+  color: var(--body);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease;
+}
+
+.priority-chip-btn:hover {
+  border-color: var(--primary);
+  color: var(--ink);
+  background: var(--surface-low);
+}
+
+.priority-chip-btn.is-active {
+  background: #FAF5EB;
+  color: var(--primary);
+  border-color: var(--primary);
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(119, 90, 25, 0.12);
+}
+
+.priority-chip-btn .chip-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  font-size: 9px;
+  background: #E5E7EB;
+  color: #4B5563;
+  transition: all 0.2s ease;
+}
+
+.priority-chip-btn.is-active .chip-indicator {
+  background: var(--primary);
+  color: #FFFFFF;
+}
+
+/* Tombol Pemicu Collapsible Sidebar Filter */
+.btn-open-filter-drawer {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 15px;
+  border-radius: 9999px;
+  background: #FFFFFF;
+  border: 1.5px solid var(--border-gold-medium);
+  color: var(--emerald-deep);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: var(--shadow-tier1);
+  transition: all 0.2s ease;
+}
+
+.btn-open-filter-drawer:hover {
+  background: var(--surface-container);
+  border-color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.filter-badge-counter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 6px;
+  border-radius: 9999px;
+  background: var(--primary);
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* 4. Collapsible Sidebar Filter (Panel Samping Offcanvas Drawer) */
+.filter-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 43, 40, 0.45);
+  backdrop-filter: blur(4px);
+  z-index: 1050;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.filter-drawer-backdrop.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.filter-drawer-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 440px;
+  max-width: 92vw;
+  background: #FFFFFF;
+  z-index: 1051;
+  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.12);
+  transform: translateX(100%);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.filter-drawer-panel.active {
+  transform: translateX(0);
+}
+
+.filter-drawer-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface-low);
+}
+
+.filter-drawer-title {
+  font-family: var(--font-heading);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0;
+}
+
+.filter-drawer-close-btn {
+  background: transparent;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--muted);
+  transition: all 0.2s ease;
+}
+
+.filter-drawer-close-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--ink);
+}
+
+.filter-drawer-body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.filter-drawer-section {
+  margin-bottom: 28px;
+}
+
+.filter-drawer-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.filter-drawer-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 11px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  background: #FFFFFF;
+}
+
+.filter-drawer-card:hover {
+  background: var(--surface-low);
+  border-color: var(--border-gold-medium);
+}
+
+.filter-drawer-card.is-active {
+  background: #FAF6EF;
+  border-color: var(--primary);
+  box-shadow: 0 2px 8px rgba(119, 90, 25, 0.08);
+}
+
+.filter-drawer-card input[type="checkbox"] {
+  margin-top: 3px;
+  width: 17px;
+  height: 17px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.filter-drawer-card-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 2px;
+}
+
+.filter-drawer-card-sub {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.filter-drawer-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--line);
+  background: var(--surface-low);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+

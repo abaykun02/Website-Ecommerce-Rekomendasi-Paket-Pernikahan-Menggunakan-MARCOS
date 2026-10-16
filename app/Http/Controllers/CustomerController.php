@@ -4,12 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\Bundling;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Payment;
 use App\Models\Review;
 use App\Models\ServiceItem;
 use App\Services\MidtransService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 
 class CustomerController extends Controller
 {
@@ -41,7 +44,8 @@ class CustomerController extends Controller
         $dpPercent = (int) ($validated['dp_percentage'] ?? 30);
         $dpAmount = ($paymentType === 'dp') ? round(($totalPrice * $dpPercent) / 100) : null;
 
-        $orderCode = 'ORD-YESI-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -4));
+        // Generate concise order code without 'YESI': e.g. WED-261012-001
+        $orderCode = Order::generateOrderCode();
 
         $order = Order::create([
             'order_code' => $orderCode,
@@ -60,6 +64,20 @@ class CustomerController extends Controller
             'dp_percentage' => $paymentType === 'dp' ? $dpPercent : null,
             'notes' => $validated['notes'] ?? null,
             'status' => 'pending',
+        ]);
+
+        // Create Order Item
+        OrderItem::create([
+            'order_id' => $order->id,
+            'vendor_id' => $bundling->vendor_id,
+            'bundling_id' => $bundling->id,
+            'service_item_id' => null,
+            'item_type' => 'bundling',
+            'item_name' => $bundling->package_name,
+            'price' => $totalPrice,
+            'quantity' => 1,
+            'subtotal' => $totalPrice,
+            'notes' => $validated['notes'] ?? null,
         ]);
 
         // Generate Snap Token
@@ -90,7 +108,8 @@ class CustomerController extends Controller
         $dpPercent = (int) ($validated['dp_percentage'] ?? 30);
         $dpAmount = ($paymentType === 'dp') ? round(($totalPrice * $dpPercent) / 100) : null;
 
-        $orderCode = 'ORD-YESI-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -4));
+        // Generate concise order code without 'YESI': e.g. WED-261012-001
+        $orderCode = Order::generateOrderCode();
 
         $order = Order::create([
             'order_code' => $orderCode,
@@ -111,6 +130,20 @@ class CustomerController extends Controller
             'status' => 'pending',
         ]);
 
+        // Create Order Item
+        OrderItem::create([
+            'order_id' => $order->id,
+            'vendor_id' => $service->vendor_id,
+            'bundling_id' => null,
+            'service_item_id' => $service->id,
+            'item_type' => 'service',
+            'item_name' => $service->name,
+            'price' => $totalPrice,
+            'quantity' => 1,
+            'subtotal' => $totalPrice,
+            'notes' => $validated['notes'] ?? null,
+        ]);
+
         // Generate Snap Token
         $this->midtransService->createSnapToken($order);
 
@@ -120,7 +153,7 @@ class CustomerController extends Controller
 
     public function orders()
     {
-        $orders = Order::with(['bundling.galleries', 'serviceItem', 'vendor', 'payment', 'review'])
+        $orders = Order::with(['bundling.galleries', 'serviceItem', 'vendor', 'payment', 'review', 'items'])
             ->where('customer_id', Auth::id())
             ->latest()
             ->paginate(10);
@@ -130,7 +163,7 @@ class CustomerController extends Controller
 
     public function orderDetail($id)
     {
-        $order = Order::with(['bundling.galleries', 'serviceItem', 'vendor', 'payment', 'review'])
+        $order = Order::with(['bundling.galleries', 'serviceItem', 'vendor', 'payment', 'review', 'items'])
             ->where('customer_id', Auth::id())
             ->findOrFail($id);
 
@@ -201,5 +234,52 @@ class CustomerController extends Controller
         );
 
         return back()->with('success', 'Terima kasih atas ulasan dan rating yang Anda berikan!');
+    }
+
+    /**
+     * Customer Profile Page (Requirement 4)
+     */
+    public function profile()
+    {
+        $user = Auth::user();
+        return view('customer.profile', compact('user'));
+    }
+
+    /**
+     * Update Customer Profile & Password (Requirement 4)
+     */
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user();
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:100'],
+            'email' => ['required', 'email', 'max:150', 'unique:users,email,' . $user->id],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'address' => ['nullable', 'string', 'max:500'],
+            'current_password' => ['nullable', 'string'],
+            'password' => ['nullable', 'confirmed', Password::min(6)],
+        ]);
+
+        // If user wants to change password
+        if (!empty($validated['password'])) {
+            if (empty($validated['current_password'])) {
+                return back()->withErrors(['current_password' => 'Masukkan kata sandi lama Anda untuk konfirmasi perubahan kata sandi.'])->withInput();
+            }
+
+            if (!Hash::check($validated['current_password'], $user->password)) {
+                return back()->withErrors(['current_password' => 'Kata sandi saat ini tidak cocok.'])->withInput();
+            }
+
+            $user->password = Hash::make($validated['password']);
+        }
+
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
+        $user->phone = $validated['phone'];
+        $user->address = $validated['address'];
+        $user->save();
+
+        return back()->with('success', 'Data profil Anda berhasil diperbarui!');
     }
 }

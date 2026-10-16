@@ -40,23 +40,45 @@
         <div class="grid-cols-2" style="gap: 20px; border-top: 1px solid var(--color-border); padding-top: 20px;">
             <div>
                 <div class="caption" style="margin-bottom: 4px;">Item Layanan Dipesan</div>
-                <div style="font-size: 16px; font-weight: 700;">
-                    @if($order->bundling)
+                @if($order->items && $order->items->isNotEmpty())
+                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                        @foreach($order->items as $item)
+                            <div style="font-size: 14.5px; font-weight: 700; display: flex; align-items: center; justify-content: space-between;">
+                                <span>
+                                    {{ $item->item_name }}
+                                    <span class="caption" style="font-weight: 400;">({{ $item->quantity }}x)</span>
+                                </span>
+                                <span style="font-size: 13px; font-weight: 600; color: var(--color-highlight);">
+                                    Rp {{ number_format($item->subtotal, 0, ',', '.') }}
+                                </span>
+                            </div>
+                        @endforeach
+                    </div>
+                @elseif($order->bundling)
+                    <div style="font-size: 16px; font-weight: 700;">
                         <a href="{{ route('bundling.detail', $order->bundling_id) }}">
                             {{ $order->bundling->package_name }}
                         </a>
                         <span class="badge badge-accent" style="font-size: 10px; margin-left: 4px;">Paket Bundling</span>
-                    @elseif($order->serviceItem)
+                    </div>
+                @elseif($order->serviceItem)
+                    <div style="font-size: 16px; font-weight: 700;">
                         <a href="{{ route('service.detail', $order->service_item_id) }}">
                             {{ $order->serviceItem->name }}
                         </a>
                         <span class="badge badge-primary" style="font-size: 10px; margin-left: 4px;">{{ $order->serviceItem->badge ?? 'Layanan' }}</span>
-                    @else
-                        Pesanan Layanan
+                    </div>
+                @else
+                    <div style="font-size: 16px; font-weight: 700;">Pesanan Layanan</div>
+                @endif
+                <div class="body-sm" style="color: var(--color-secondary); margin-top: 6px; display: flex; align-items: center; justify-content: space-between;">
+                    <span>Vendor: <strong>{{ $order->vendor->vendor_name ?? 'Mitra Vendor' }}</strong></span>
+                    @if($order->vendor_id)
+                        <a href="{{ route('customer.chat.start', ['vendorId' => $order->vendor_id, 'order_id' => $order->id]) }}" class="btn btn-secondary btn-sm" style="height: 28px; padding: 0 10px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">
+                            <i data-lucide="message-circle" style="width: 13px; height: 13px;"></i>
+                            <span>Chat Vendor</span>
+                        </a>
                     @endif
-                </div>
-                <div class="body-sm" style="color: var(--color-secondary); margin-top: 4px;">
-                    Vendor: <strong>{{ $order->vendor->vendor_name }}</strong> ({{ $order->vendor->phone }})
                 </div>
             </div>
 

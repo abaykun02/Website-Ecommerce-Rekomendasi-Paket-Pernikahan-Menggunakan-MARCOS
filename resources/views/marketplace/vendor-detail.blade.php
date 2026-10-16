@@ -28,13 +28,17 @@
 
             <!-- Action CTAs -->
             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <a href="{{ route('customer.chat.start', $vendor->id) }}" class="btn btn-primary btn-sm" style="display: inline-flex; align-items: center; gap: 6px;">
+                    <i data-lucide="messages-square" style="width: 15px; height: 15px;"></i>
+                    <span>Chat Vendor Langsung</span>
+                </a>
                 <a href="{{ $vendor->maps_url }}" target="_blank" class="btn btn-secondary btn-sm">
                     <i data-lucide="navigation" style="width: 14px; height: 14px;"></i>
                     Peta Lokasi Google Maps
                 </a>
-                <a href="{{ $vendor->whatsapp_url }}" target="_blank" class="btn btn-primary btn-sm" style="background: #25D366; color: white;">
+                <a href="{{ $vendor->whatsapp_url }}" target="_blank" class="btn btn-secondary btn-sm" style="color: #16A34A; display: inline-flex; align-items: center; gap: 6px;">
                     <i data-lucide="message-circle" style="width: 15px; height: 15px;"></i>
-                    Hubungi WhatsApp
+                    WhatsApp
                 </a>
             </div>
         </div>

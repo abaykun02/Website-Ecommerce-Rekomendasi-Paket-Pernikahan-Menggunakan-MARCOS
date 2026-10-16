@@ -17,8 +17,8 @@ class MidtransService
 
     protected function initMidtrans(): void
     {
-        Config::$serverKey = config('midtrans.server_key', env('MIDTRANS_SERVER_KEY', 'MIDTRANS_SERVER_KEY_ANDA'));
-        Config::$clientKey = config('midtrans.client_key', env('MIDTRANS_CLIENT_KEY', 'MIDTRANS_SERVER_KEY_ANDA'));
+        Config::$serverKey = config('midtrans.server_key', env('MIDTRANS_SERVER_KEY', ''));
+        Config::$clientKey = config('midtrans.client_key', env('MIDTRANS_CLIENT_KEY', ''));
         Config::$isProduction = (bool) config('midtrans.is_production', false);
         Config::$isSanitized = (bool) config('midtrans.is_sanitized', true);
         Config::$is3ds = (bool) config('midtrans.is_3ds', true);

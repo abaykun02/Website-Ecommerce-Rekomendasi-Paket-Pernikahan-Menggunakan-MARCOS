@@ -28,31 +28,67 @@ class AuthController extends Controller
         $loginInput = trim($request->input('email'));
         $passwordInput = $request->input('password');
 
-        // Cari user berdasarkan email atau kata kunci "Admin"
+        // Cari user berdasarkan email, nomor telepon, nama, atau kata kunci "Admin"
         $user = User::where(function ($q) use ($loginInput) {
             $q->where('email', $loginInput)
-              ->orWhere('email', strtolower($loginInput));
+              ->orWhere('email', strtolower($loginInput))
+              ->orWhere('phone', $loginInput)
+              ->orWhere('name', $loginInput);
             
             if (strtolower($loginInput) === 'admin') {
                 $q->orWhere('role', 'admin');
             }
         })->first();
 
-        // Autentikasi: Mendukung plain text (sesuai instruksi) dan Hash::check sebagai fallback
-        if ($user && ($user->password === $passwordInput || Hash::check($passwordInput, $user->password))) {
+        // Cek kecocokan password: aman untuk plain text maupun bcrypt hash (mencegah crash RuntimeException pada Laravel 12)
+        $passwordMatches = false;
+        if ($user) {
+            if ($user->password === $passwordInput) {
+                $passwordMatches = true;
+            } else {
+                try {
+                    $passwordMatches = Hash::check($passwordInput, $user->password);
+                } catch (\Throwable $e) {
+                    $passwordMatches = false;
+                }
+            }
+        }
+
+        // Autentikasi berhasil
+        if ($user && $passwordMatches) {
             if ($user->is_active === false) {
                 return back()->withErrors([
                     'email' => 'Akun Anda telah dinonaktifkan oleh administrator. Silakan hubungi admin.',
+                ])->with('error_modal', [
+                    'title' => 'Akun Dinonaktifkan',
+                    'message' => 'Akun Anda telah dinonaktifkan oleh administrator. Silakan hubungi admin pengelola sistem.',
+                    'type' => 'inactive'
                 ])->onlyInput('email');
             }
 
             Auth::login($user, $request->boolean('remember'));
             $request->session()->regenerate();
-            return $this->redirectBasedOnRole($user);
+            return redirect()->intended($this->redirectUrlBasedOnRole($user));
         }
 
+        // Jika user ditemukan tapi password tidak cocok
+        if ($user) {
+            return back()->withErrors([
+                'password' => 'Kata sandi yang Anda masukkan salah.',
+            ])->with('error_modal', [
+                'title' => 'Kata Sandi Salah',
+                'message' => 'Kata sandi yang Anda masukkan tidak cocok dengan akun ini. Silakan periksa kembali kata sandi akun Anda dan coba lagi.',
+                'type' => 'wrong_password'
+            ])->onlyInput('email');
+        }
+
+        // Jika email/username tidak ditemukan
         return back()->withErrors([
-            'email' => 'Email/Username atau kata sandi tidak cocok.',
+            'email' => 'Email atau username tidak terdaftar pada sistem.',
+        ])->with('error_modal', [
+            'title' => 'Akun Tidak Ditemukan',
+            'message' => 'Alamat email atau username yang Anda masukkan tidak terdaftar pada sistem kami. Silakan periksa kembali atau buat akun baru.',
+            'type' => 'user_not_found'
         ])->onlyInput('email');
     }
 
@@ -162,12 +198,17 @@ class AuthController extends Controller
         return redirect()->route('home')->with('success', 'Anda telah berhasil keluar.');
     }
 
-    protected function redirectBasedOnRole(User $user)
+    protected function redirectUrlBasedOnRole(User $user): string
     {
         return match ($user->role) {
-            'admin' => redirect()->route('admin.dashboard'),
-            'vendor' => redirect()->route('vendor.dashboard'),
-            default => redirect()->route('home'),
+            'admin' => route('admin.dashboard'),
+            'vendor' => route('vendor.dashboard'),
+            default => route('home'),
         };
+    }
+
+    protected function redirectBasedOnRole(User $user)
+    {
+        return redirect()->to($this->redirectUrlBasedOnRole($user));
     }
 }

@@ -27,14 +27,6 @@
         </div>
     </div>
 
-    <!-- Navigation Tabs for Vendor -->
-    <div style="display: flex; gap: 8px; margin-bottom: 28px; border-bottom: 1px solid var(--line); padding-bottom: 12px; overflow-x: auto;">
-        <a href="{{ route('vendor.dashboard') }}" class="chip active">Ringkasan</a>
-        <a href="{{ route('vendor.bundlings') }}" class="chip">Kelola Paket ({{ $stats['total_bundlings'] }})</a>
-        <a href="{{ route('vendor.galleries') }}" class="chip">Galeri Foto</a>
-        <a href="{{ route('vendor.orders') }}" class="chip">Pesanan Masuk ({{ $stats['total_orders'] }})</a>
-        <a href="{{ route('vendor.profile') }}" class="chip">Profil Toko</a>
-    </div>
 
     <!-- Stats Grid (Minimalist Scale) -->
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 28px;">

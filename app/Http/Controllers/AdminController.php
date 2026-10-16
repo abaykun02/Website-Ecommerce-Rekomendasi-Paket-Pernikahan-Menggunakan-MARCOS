@@ -415,6 +415,51 @@ class AdminController extends Controller
         return view('admin.spk-marcos-pdf', compact('marcosData'));
     }
 
+    /**
+     * User Management: List all users
+     */
+    public function users(Request $request)
+    {
+        $query = User::with('vendor');
+
+        if ($request->filled('role')) {
+            $query->where('role', $request->role);
+        }
+
+        if ($request->filled('search')) {
+            $s = $request->search;
+            $query->where(function ($q) use ($s) {
+                $q->where('name', 'LIKE', "%{$s}%")
+                    ->orWhere('email', 'LIKE', "%{$s}%")
+                    ->orWhere('phone', 'LIKE', "%{$s}%");
+            });
+        }
+
+        $users = $query->latest()->paginate(15)->withQueryString();
+
+        return view('admin.users', compact('users'));
+    }
+
+    /**
+     * User Management: Update user details
+     */
+    public function updateUser(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:100'],
+            'email' => ['required', 'email', 'max:150', 'unique:users,email,' . $user->id],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'role' => ['required', 'in:admin,vendor,customer'],
+            'is_active' => ['required', 'boolean'],
+        ]);
+
+        $user->update($validated);
+
+        return back()->with('success', "Data pengguna {$user->name} berhasil diperbarui.");
+    }
+
     public function toggleUserStatus($id)
     {
         $user = User::findOrFail($id);
@@ -440,5 +485,61 @@ class AdminController extends Controller
         $user->delete();
 
         return back()->with('success', "Akun pengguna {$name} berhasil dihapus permanen dari sistem!");
+    }
+
+    /**
+     * Vendor Management: List all vendors
+     */
+    public function vendors(Request $request)
+    {
+        $query = Vendor::with('user')
+            ->withCount(['bundlings', 'serviceItems', 'orders', 'reviews']);
+
+        if ($request->filled('search')) {
+            $s = $request->search;
+            $query->where(function ($q) use ($s) {
+                $q->where('vendor_name', 'LIKE', "%{$s}%")
+                    ->orWhere('owner_name', 'LIKE', "%{$s}%")
+                    ->orWhere('phone', 'LIKE', "%{$s}%")
+                    ->orWhere('location_address', 'LIKE', "%{$s}%");
+            });
+        }
+
+        $vendors = $query->latest()->paginate(12)->withQueryString();
+
+        return view('admin.vendors', compact('vendors'));
+    }
+
+    /**
+     * Vendor Management: Update vendor details
+     */
+    public function updateVendor(Request $request, $id)
+    {
+        $vendor = Vendor::findOrFail($id);
+
+        $validated = $request->validate([
+            'vendor_name' => ['required', 'string', 'max:100'],
+            'owner_name' => ['required', 'string', 'max:100'],
+            'phone' => ['required', 'string', 'max:30'],
+            'location_address' => ['required', 'string', 'max:500'],
+            'google_maps_url' => ['nullable', 'url', 'max:500'],
+            'description' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        $vendor->update($validated);
+
+        return back()->with('success', "Data mitra vendor {$vendor->vendor_name} berhasil diperbarui.");
+    }
+
+    /**
+     * Vendor Management: Delete vendor
+     */
+    public function deleteVendor($id)
+    {
+        $vendor = Vendor::findOrFail($id);
+        $name = $vendor->vendor_name;
+        $vendor->delete();
+
+        return back()->with('success', "Data mitra vendor {$name} berhasil dihapus.");
     }
 }

@@ -24,83 +24,100 @@
             Platform kurasi vendor pernikahan terbaik di Sumatera Utara. Dilengkapi sistem pemeringkatan objektif multi-kriteria untuk memudahkan Anda menentukan pilihan yang paling sesuai.
         </p>
 
-        <!-- Filter Bar Kabut Terpadu (Dropdown Rapi & Terorganisir) -->
-        <div class="filter-bar-kabut" style="text-align: left; margin-bottom: 16px;">
-            <form action="{{ route('home') }}" method="GET" style="display: contents;">
-                <!-- 1. Input Pencarian -->
-                <div class="filter-item" style="flex: 1.5; min-width: 200px;">
-                    <label for="filter-search">Pencarian Kata Kunci</label>
-                    <input type="text" id="filter-search" name="search" value="{{ request('search') }}" 
-                           placeholder="Cari paket rias, dekorasi, atau nama vendor..." 
-                           class="form-input">
-                </div>
+        <!-- Filter Hybrid Terpadu: Search + Category Pills + Priority Chips + Collapsible Drawer -->
+        @php
+            $allPrefOptions = [
+                'low_price' => ['label' => 'Harga Paling Terjangkau', 'sub' => 'Prioritas Efisiensi Anggaran (C5)', 'short' => '🏷️ Hemat Biaya'],
+                'kualitas_flawless' => ['label' => 'Kualitas Riasan Flawless', 'sub' => 'Tahan Lama & Hasil Terbaik (C1)', 'short' => '✨ Rias Flawless'],
+                'estetik_modern' => ['label' => 'Konsep Estetik & Modern', 'sub' => 'Desain Pelaminan Mewah (C2)', 'short' => '🏛️ Dekor Estetik'],
+                'paket_lengkap' => ['label' => 'Kelengkapan Paket All-In', 'sub' => 'Fasilitas Terlengkap (C3)', 'short' => '📦 Fasilitas Lengkap'],
+                'rating_ulasan' => ['label' => 'Rating & Ulasan Terbaik', 'sub' => 'Kepuasan Pengantin Tertinggi (C4)', 'short' => '⭐ Rating Terbaik'],
+                'keamanan_risiko' => ['label' => 'Keamanan & Minim Risiko', 'sub' => 'Garansi Busana & Fasilitas (C6)', 'short' => '🛡️ Minim Risiko'],
+                'terdekat' => ['label' => 'Lokasi Terdekat / Respon Cepat', 'sub' => 'Efisiensi Transportasi (C7)', 'short' => '📍 Respon Cepat'],
+                'tradisional_adat' => ['label' => 'Busana Adat & Tradisional', 'sub' => 'Nuansa Budaya Nusantara (C2 & C3)', 'short' => '👑 Busana Adat'],
+            ];
+        @endphp
 
-                <!-- 2. Dropdown Kategori -->
-                <div class="filter-item">
-                    <label for="filter-kategori">Pilihan Kategori Layanan</label>
-                    <select id="filter-kategori" name="kategori" class="form-select">
-                        <option value="all" {{ $activeCategory === 'all' ? 'selected' : '' }}>Semua Kategori Layanan</option>
-                        <option value="bundling" {{ $activeCategory === 'bundling' ? 'selected' : '' }}>Paket Bundling Utama (MUA + Dekorasi)</option>
-                        @foreach($categories as $cat)
-                            <option value="{{ $cat->slug }}" {{ $activeCategory === $cat->slug ? 'selected' : '' }}>
-                                {{ $cat->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
+        <div class="filter-hybrid-container">
+            <form id="homeFilterForm" action="{{ route('home') }}" method="GET">
+                <!-- Hidden inputs for active category -->
+                <input type="hidden" name="kategori" id="hiddenCategoryInput" value="{{ $activeCategory }}">
 
-                <!-- 3. Multi-Select Prioritas Rekomendasi MARCOS -->
-                <div class="filter-item" style="position: relative; flex: 1.6; min-width: 240px;">
-                    <label>Prioritas Kebutuhan (Bisa Pilih > 1)</label>
-                    <div id="prefDropdownTrigger" class="form-select" style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; background: #fff;" onclick="togglePrefDropdown(event)">
-                        <span id="prefDropdownLabel" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px;">
-                            @if(count($preferences) > 0)
-                                <strong style="color: var(--emerald-deep);">{{ count($preferences) }} Prioritas Dipilih</strong>
-                            @else
-                                Pilih Prioritas (Bisa > 1)
-                            @endif
-                        </span>
-                        <i data-lucide="chevron-down" style="width: 14px; height: 14px; flex-shrink: 0; color: var(--muted);"></i>
-                    </div>
-
-                    <!-- Dropdown Options Panel -->
-                    <div id="prefDropdownMenu" style="display: none; position: absolute; top: calc(100% + 6px); left: 0; right: 0; min-width: 290px; background: #FFFFFF; border: 1px solid var(--border-gold-medium); border-radius: 12px; box-shadow: var(--shadow-tier2); padding: 12px 14px; z-index: 100; max-height: 310px; overflow-y: auto;">
-                        <div style="font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.04em;">
-                            Centang 1, 2, 3 atau lebih prioritas:
-                        </div>
-                        @php
-                            $allPrefOptions = [
-                                'low_price' => ['label' => 'Harga Paling Terjangkau', 'sub' => 'Prioritas Efisiensi Anggaran (C5)'],
-                                'kualitas_flawless' => ['label' => 'Kualitas Riasan Flawless', 'sub' => 'Tahan Lama & Hasil Terbaik (C1)'],
-                                'estetik_modern' => ['label' => 'Konsep Estetik & Modern', 'sub' => 'Desain Pelaminan Mewah (C2)'],
-                                'paket_lengkap' => ['label' => 'Kelengkapan Paket All-In', 'sub' => 'Fasilitas Terlengkap (C3)'],
-                                'rating_ulasan' => ['label' => 'Rating & Ulasan Terbaik', 'sub' => 'Kepuasan Pengantin Tertinggi (C4)'],
-                                'keamanan_risiko' => ['label' => 'Keamanan & Minim Risiko', 'sub' => 'Garansi Busana & Fasilitas (C6)'],
-                                'terdekat' => ['label' => 'Lokasi Terdekat / Respon Cepat', 'sub' => 'Efisiensi Transportasi (C7)'],
-                                'tradisional_adat' => ['label' => 'Busana Adat & Tradisional', 'sub' => 'Nuansa Budaya Nusantara (C2 & C3)'],
-                            ];
-                        @endphp
-                        @foreach($allPrefOptions as $key => $opt)
-                            <label style="display: flex; align-items: flex-start; gap: 10px; padding: 7px 6px; border-radius: 6px; cursor: pointer; transition: background 0.15s ease;" onmouseover="this.style.background='var(--surface-container)'" onmouseout="this.style.background='transparent'">
-                                <input type="checkbox" name="preferences[]" value="{{ $key }}" {{ in_array($key, $preferences) ? 'checked' : '' }} onchange="updatePrefLabel()" style="margin-top: 3px; accent-color: var(--primary);">
-                                <div style="flex: 1;">
-                                    <div style="font-size: 12.5px; font-weight: 600; color: var(--ink);">{{ $opt['label'] }}</div>
-                                    <div style="font-size: 11px; color: var(--muted);">{{ $opt['sub'] }}</div>
-                                </div>
-                            </label>
-                        @endforeach
-                    </div>
-                </div>
-
-                <!-- 4. Tombol Aksi -->
-                <div style="display: flex; gap: 8px; align-items: flex-end; padding-top: 22px;">
-                    <button type="submit" class="btn btn-primary" style="height: 42px;">
-                        <i data-lucide="filter" style="width: 15px; height: 15px;"></i>
-                        Terapkan
+                <!-- 1. Search Box Modern -->
+                <div class="filter-search-box">
+                    <i data-lucide="search" style="width: 18px; height: 18px; color: var(--muted); margin-left: 4px; flex-shrink: 0;"></i>
+                    <input type="text" id="filterSearchInput" name="search" value="{{ request('search') }}" 
+                           placeholder="Cari paket rias, dekorasi, atau nama vendor..."
+                           onkeydown="if(event.key === 'Enter') { event.preventDefault(); submitHomeFilter(); }">
+                    @if(request('search'))
+                        <button type="button" onclick="document.getElementById('filterSearchInput').value=''; submitHomeFilter();" style="background:none; border:none; color:var(--muted); cursor:pointer; padding:4px 8px;" title="Hapus pencarian">
+                            <i data-lucide="x" style="width: 14px; height: 14px;"></i>
+                        </button>
+                    @endif
+                    <button type="button" class="btn-open-filter-drawer" onclick="openFilterDrawer()">
+                        <i data-lucide="sliders-horizontal" style="width: 14px; height: 14px;"></i>
+                        <span>Panel Filter</span>
+                        @if(count($preferences) > 0)
+                            <span class="filter-badge-counter">{{ count($preferences) }}</span>
+                        @endif
                     </button>
+                </div>
+
+                <!-- 2. Kategori Layanan (Capsule / Pill Bar Horizontal - Klik Langsung Filter Otomatis) -->
+                <div class="category-pills-bar">
+                    <button type="button" class="category-pill-btn {{ $activeCategory === 'all' ? 'active' : '' }}" onclick="selectCategory('all')">
+                        <i data-lucide="sparkles" style="width: 13px; height: 13px;"></i>
+                        Semua Layanan
+                    </button>
+                    <button type="button" class="category-pill-btn {{ in_array($activeCategory, ['bundling', 'paket-bundling']) ? 'active' : '' }}" onclick="selectCategory('paket-bundling')">
+                        <i data-lucide="gem" style="width: 13px; height: 13px;"></i>
+                        Paket Bundling MUA & Dekor
+                    </button>
+                    @foreach($categories as $cat)
+                        @if(!in_array($cat->slug, ['bundling', 'paket-bundling']))
+                            @php
+                                $catIcon = match($cat->slug) {
+                                    'make-up-only' => 'sparkles',
+                                    'dekorasi-only' => 'flower-2',
+                                    'dekorasi-akad' => 'landmark',
+                                    'gaun-busana' => 'shirt',
+                                    'baju-adat' => 'crown',
+                                    default => 'tag',
+                                };
+                            @endphp
+                            <button type="button" class="category-pill-btn {{ $activeCategory === $cat->slug ? 'active' : '' }}" onclick="selectCategory('{{ $cat->slug }}')">
+                                <i data-lucide="{{ $catIcon }}" style="width: 13px; height: 13px;"></i>
+                                {{ $cat->name }}
+                            </button>
+                        @endif
+                    @endforeach
+                </div>
+
+                <!-- 3. Prioritas Kebutuhan MARCOS (Multi-Select Chips: Klik Langsung Filter Tanpa Tombol Terapkan) -->
+                <div class="priority-chips-section">
+                    <div style="font-size: 11.5px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 6px;">
+                        <span>Prioritas Kebutuhan (Pilih > 1):</span>
+                    </div>
+
+                    <div class="priority-chips-list">
+                        @foreach($allPrefOptions as $key => $opt)
+                            @php $isSelected = in_array($key, $preferences); @endphp
+                            <!-- Checkbox yang tersimpan dan disubmit form -->
+                            <input type="checkbox" name="preferences[]" id="pref_chk_{{ $key }}" value="{{ $key }}" {{ $isSelected ? 'checked' : '' }} style="display: none;">
+                            
+                            <button type="button" class="priority-chip-btn {{ $isSelected ? 'is-active' : '' }}" onclick="togglePriority('{{ $key }}')">
+                                <span class="chip-indicator">
+                                    @if($isSelected) ✓ @else + @endif
+                                </span>
+                                <span>{{ $opt['short'] }}</span>
+                            </button>
+                        @endforeach
+                    </div>
+
                     @if(count($preferences) > 0 || $activeCategory !== 'all' || request('search'))
-                        <a href="{{ route('home') }}" class="btn btn-secondary" style="height: 42px;" title="Reset Filter">
-                            <i data-lucide="rotate-ccw" style="width: 14px; height: 14px;"></i>
+                        <a href="{{ route('home') }}" class="btn btn-secondary btn-sm" style="border-radius: 9999px; height: 32px; font-size: 11.5px; padding: 0 12px; gap: 4px;" title="Reset Semua Filter">
+                            <i data-lucide="rotate-ccw" style="width: 12px; height: 12px;"></i>
+                            Reset
                         </a>
                     @endif
                 </div>
@@ -109,13 +126,8 @@
 
         @if(count($preferences) > 0)
             <div style="display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.85rem; color: var(--muted); flex-wrap: wrap;">
-                <span class="badge badge-moss">{{ count($preferences) }} Prioritas Aktif</span>
-                <span>Kombinasi bobot MARCOS disesuaikan berdasarkan:</span>
-                @foreach($preferences as $p)
-                    <span class="badge badge-outline" style="font-size: 11px;">
-                        {{ $allPrefOptions[$p]['label'] ?? ucfirst($p) }}
-                    </span>
-                @endforeach
+                <span class="badge badge-moss">{{ count($preferences) }} Prioritas Aktif Terpilih</span>
+                <span>Bobot MARCOS diperbarui seketika berdasarkan kriteria yang Anda tentukan.</span>
             </div>
         @endif
     </div>
@@ -301,74 +313,158 @@
     </div>
 </section>
 
-<!-- Section 3: Cerita & Nilai Kurasi (Editorial Kabut) -->
-<section class="section-paper">
-    <div class="container" style="max-width: 900px; text-align: center;">
-        <span class="caption" style="text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; color: var(--moss); display: block; margin-bottom: 8px;">
-            Komitmen Layanan Glow & Grace
-        </span>
-        <h2 class="headline-md" style="margin-bottom: 18px; font-size: 1.8rem;">
-            Kepastian Mutu Melalui Evaluasi Matematis yang Transparan
-        </h2>
-        <p class="body-md" style="line-height: 1.7; margin-bottom: 36px; color: var(--body);">
-            Kami memahami bahwa pernikahan adalah momen sakral sekali seumur hidup. Karena itu, setiap rekomendasi di platform kami tidak ditentukan oleh siapa yang membayar iklan, melainkan hasil komputasi multi-kriteria MARCOS yang mempertimbangkan kualitas riasan, keandalan portofolio, kepuasan pelanggan terdahulu, serta kepatutan harga secara seimbang.
-        </p>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; text-align: left;">
-            <div class="card-kabut" style="background: var(--cream);">
-                <div style="width: 32px; height: 32px; border-radius: var(--radius-sm); background: var(--moss); color: var(--cream); display: flex; align-items: center; justify-content: center; margin-bottom: 14px;">
-                    <i data-lucide="shield-check" style="width: 18px; height: 18px;"></i>
-                </div>
-                <h4 style="font-family: var(--font-heading); font-size: 1.05rem; margin-bottom: 6px; color: var(--ink);">Vendor Terverifikasi</h4>
-                <p class="body-sm">Seluruh mitra MUA dan dekorator telah melalui verifikasi portofolio dan rekam jejak acara riil.</p>
+<!-- Collapsible Sidebar Filter Drawer (Panel Samping Offcanvas - Mewah & Bersih) -->
+<div id="filterDrawerBackdrop" class="filter-drawer-backdrop" onclick="closeFilterDrawer()"></div>
+<div id="filterDrawerPanel" class="filter-drawer-panel">
+    <!-- Header Drawer -->
+    <div class="filter-drawer-header">
+        <div>
+            <h3 class="filter-drawer-title">Filter & Kriteria SPK</h3>
+            <div style="font-size: 11.5px; color: var(--muted); margin-top: 2px;">
+                Personalisasi Rekomendasi MARCOS Multi-Kriteria
             </div>
+        </div>
+        <button type="button" class="filter-drawer-close-btn" onclick="closeFilterDrawer()" title="Tutup Panel">
+            <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+        </button>
+    </div>
 
-            <div class="card-kabut" style="background: var(--cream);">
-                <div style="width: 32px; height: 32px; border-radius: var(--radius-sm); background: var(--rust); color: var(--cream); display: flex; align-items: center; justify-content: center; margin-bottom: 14px;">
-                    <i data-lucide="credit-card" style="width: 18px; height: 18px;"></i>
-                </div>
-                <h4 style="font-family: var(--font-heading); font-size: 1.05rem; margin-bottom: 6px; color: var(--ink);">Pembayaran Aman Midtrans</h4>
-                <p class="body-sm">Transaksi terproteksi dengan opsi Down Payment (DP 30%/50%) serta pelunasan fleksibel.</p>
+    <!-- Body Drawer -->
+    <div class="filter-drawer-body">
+        <!-- 1. Kategori Layanan -->
+        <div class="filter-drawer-section">
+            <div class="filter-drawer-section-title">
+                <span>Pilih Kategori Layanan</span>
+                <span style="font-weight: 500; font-size: 11px; text-transform: none; color: var(--primary);">Auto-Filter</span>
             </div>
-
-            <div class="card-kabut" style="background: var(--cream);">
-                <div style="width: 32px; height: 32px; border-radius: var(--radius-sm); background: var(--ink); color: var(--cream); display: flex; align-items: center; justify-content: center; margin-bottom: 14px;">
-                    <i data-lucide="sliders" style="width: 18px; height: 18px;"></i>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <div class="filter-drawer-card {{ $activeCategory === 'all' ? 'is-active' : '' }}" onclick="selectCategory('all')">
+                    <input type="radio" name="drawer_kategori" {{ $activeCategory === 'all' ? 'checked' : '' }} style="accent-color: var(--primary); margin-top: 3px; pointer-events: none;">
+                    <div>
+                        <div class="filter-drawer-card-label">Semua Layanan</div>
+                        <div class="filter-drawer-card-sub">Tampilkan seluruh paket bundling dan layanan satuan</div>
+                    </div>
                 </div>
-                <h4 style="font-family: var(--font-heading); font-size: 1.05rem; margin-bottom: 6px; color: var(--ink);">Preferensi Personal</h4>
-                <p class="body-sm">Sistem MARCOS menyesuaikan bobot kriteria secara real-time mengikuti kebutuhan spesifik Anda.</p>
+                <div class="filter-drawer-card {{ in_array($activeCategory, ['bundling', 'paket-bundling']) ? 'is-active' : '' }}" onclick="selectCategory('paket-bundling')">
+                    <input type="radio" name="drawer_kategori" {{ in_array($activeCategory, ['bundling', 'paket-bundling']) ? 'checked' : '' }} style="accent-color: var(--primary); margin-top: 3px; pointer-events: none;">
+                    <div>
+                        <div class="filter-drawer-card-label">Paket Bundling MUA & Dekorasi</div>
+                        <div class="filter-drawer-card-sub">Paket pernikahan lengkap dengan evaluasi SPK MARCOS</div>
+                    </div>
+                </div>
+                @foreach($categories as $cat)
+                    @if(!in_array($cat->slug, ['bundling', 'paket-bundling']))
+                        <div class="filter-drawer-card {{ $activeCategory === $cat->slug ? 'is-active' : '' }}" onclick="selectCategory('{{ $cat->slug }}')">
+                            <input type="radio" name="drawer_kategori" {{ $activeCategory === $cat->slug ? 'checked' : '' }} style="accent-color: var(--primary); margin-top: 3px; pointer-events: none;">
+                            <div>
+                                <div class="filter-drawer-card-label">{{ $cat->name }}</div>
+                                <div class="filter-drawer-card-sub">Katalog spesifik kategori {{ $cat->name }}</div>
+                            </div>
+                        </div>
+                    @endif
+                @endforeach
+            </div>
+        </div>
+
+        <!-- 2. Prioritas Kebutuhan MARCOS (Bisa Pilih > 1) -->
+        <div class="filter-drawer-section">
+            <div class="filter-drawer-section-title">
+                <span>Prioritas Kebutuhan MARCOS (Bisa Pilih > 1)</span>
+                @if(count($preferences) > 0)
+                    <span class="badge badge-moss" style="font-size: 10px;">{{ count($preferences) }} Dipilih</span>
+                @endif
+            </div>
+            <div style="font-size: 12px; color: var(--body); margin-bottom: 12px; line-height: 1.5;">
+                Centang satu atau beberapa prioritas. Hasil rekomendasi paket langsung dikalkulasi ulang secara otomatis:
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                @foreach($allPrefOptions as $key => $opt)
+                    @php $isCardChecked = in_array($key, $preferences); @endphp
+                    <div class="filter-drawer-card {{ $isCardChecked ? 'is-active' : '' }}" onclick="togglePriorityFromDrawer('{{ $key }}', event)">
+                        <input type="checkbox" id="drawer_chk_{{ $key }}" {{ $isCardChecked ? 'checked' : '' }} style="pointer-events: none;">
+                        <div style="flex: 1;">
+                            <div class="filter-drawer-card-label">{{ $opt['label'] }}</div>
+                            <div class="filter-drawer-card-sub">{{ $opt['sub'] }}</div>
+                        </div>
+                    </div>
+                @endforeach
             </div>
         </div>
     </div>
-</section>
+
+    <!-- Footer Drawer -->
+    <div class="filter-drawer-footer">
+        <a href="{{ route('home') }}" class="btn btn-secondary btn-sm" style="gap: 6px;">
+            <i data-lucide="rotate-ccw" style="width: 13px; height: 13px;"></i>
+            Reset Filter
+        </a>
+        <button type="button" class="btn btn-primary btn-sm" onclick="closeFilterDrawer()">
+            Lihat Hasil Rekomendasi &rarr;
+        </button>
+    </div>
+</div>
 
 @push('scripts')
 <script>
-    function togglePrefDropdown(e) {
-        if (e) e.stopPropagation();
-        const menu = document.getElementById('prefDropdownMenu');
-        if (menu) {
-            menu.style.display = menu.style.display === 'none' || menu.style.display === '' ? 'block' : 'none';
+    function openFilterDrawer() {
+        document.getElementById('filterDrawerBackdrop')?.classList.add('active');
+        document.getElementById('filterDrawerPanel')?.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeFilterDrawer() {
+        document.getElementById('filterDrawerBackdrop')?.classList.remove('active');
+        document.getElementById('filterDrawerPanel')?.classList.remove('active');
+        document.body.style.overflow = '';
+        sessionStorage.removeItem('openFilterDrawerAfterReload');
+    }
+
+    function selectCategory(slug) {
+        const catInput = document.getElementById('hiddenCategoryInput');
+        if (catInput) {
+            catInput.value = slug;
+        }
+        submitHomeFilter();
+    }
+
+    function togglePriority(val) {
+        const chk = document.getElementById('pref_chk_' + val);
+        if (chk) {
+            chk.checked = !chk.checked;
+        }
+        submitHomeFilter();
+    }
+
+    function togglePriorityFromDrawer(val, event) {
+        if (event) event.preventDefault();
+        const chk = document.getElementById('pref_chk_' + val);
+        if (chk) {
+            chk.checked = !chk.checked;
+        }
+        sessionStorage.setItem('openFilterDrawerAfterReload', '1');
+        submitHomeFilter();
+    }
+
+    function submitHomeFilter() {
+        const form = document.getElementById('homeFilterForm');
+        if (form) {
+            form.submit();
         }
     }
 
-    function updatePrefLabel() {
-        const checkboxes = document.querySelectorAll('input[name="preferences[]"]:checked');
-        const label = document.getElementById('prefDropdownLabel');
-        if (checkboxes.length === 0) {
-            label.innerHTML = 'Pilih Prioritas (Bisa > 1)';
-        } else {
-            label.innerHTML = '<strong style="color: var(--emerald-deep);">' + checkboxes.length + ' Prioritas Dipilih</strong>';
+    document.addEventListener('DOMContentLoaded', function() {
+        if (sessionStorage.getItem('openFilterDrawerAfterReload') === '1') {
+            openFilterDrawer();
         }
-    }
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+    });
 
-    document.addEventListener('click', function(e) {
-        const menu = document.getElementById('prefDropdownMenu');
-        const trigger = document.getElementById('prefDropdownTrigger');
-        if (menu && menu.style.display === 'block') {
-            if (!menu.contains(e.target) && !trigger.contains(e.target)) {
-                menu.style.display = 'none';
-            }
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeFilterDrawer();
         }
     });
 

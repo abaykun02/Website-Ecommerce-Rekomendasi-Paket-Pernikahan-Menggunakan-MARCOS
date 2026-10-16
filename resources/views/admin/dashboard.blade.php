@@ -23,15 +23,6 @@
         </div>
     </div>
 
-    <!-- Navigation Chips Admin -->
-    <div style="display: flex; gap: 8px; margin-bottom: 28px; border-bottom: 1px solid var(--line); padding-bottom: 12px; overflow-x: auto;">
-        <a href="{{ route('admin.dashboard') }}" class="chip active">Ringkasan</a>
-        <a href="{{ route('admin.criterias') }}" class="chip">Kriteria & Bobot (C1-C7)</a>
-        <a href="{{ route('admin.evaluations') }}" class="chip">Matriks Evaluasi Alternatif</a>
-        <a href="{{ route('admin.orders') }}" class="chip">Pesanan & Pembayaran ({{ $stats['pending_payments'] }} Pending)</a>
-        <a href="{{ route('admin.spk') }}" class="chip">Laporan Lengkap MARCOS</a>
-        <a href="{{ route('admin.users') }}" class="chip">Pengguna & Vendor</a>
-    </div>
 
     <!-- Stats 6-Card Grid (Minimalist Scale) -->
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; margin-bottom: 28px;">

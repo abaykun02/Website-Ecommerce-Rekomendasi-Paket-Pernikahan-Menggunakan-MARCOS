@@ -1,37 +1,45 @@
 @extends('layouts.app')
 
-@section('title', 'Pesanan Masuk - ' . $vendor->vendor_name)
+@section('title', 'Pesanan Masuk & Berjalan - ' . $vendor->vendor_name)
 
 @section('content')
 <div class="container-wide" style="padding-top: 36px; padding-bottom: 64px;">
     <!-- Vendor Header -->
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px;">
         <div>
-            <span class="badge badge-accent" style="margin-bottom: 6px;">Manajemen Transaksi</span>
-            <h1 class="headline-md">Pesanan Masuk Pelanggan</h1>
+            <span class="badge badge-accent" style="margin-bottom: 6px;">Pesanan Aktif</span>
+            <h1 class="headline-md">Pesanan Masuk & Berjalan</h1>
+            <p class="body-sm">Kelola pesanan yang menunggu konfirmasi, menunggu pembayaran, atau sedang dalam persiapan acara.</p>
         </div>
-        <a href="{{ route('vendor.dashboard') }}" class="btn btn-secondary btn-sm">
-            &larr; Kembali ke Dashboard
-        </a>
+        
+        <!-- Toggle Tabs: Berjalan vs Selesai -->
+        <div style="display: flex; gap: 8px;">
+            <a href="{{ route('vendor.orders') }}" class="btn btn-primary btn-sm">
+                <i data-lucide="clock" style="width: 14px; height: 14px;"></i>
+                Pesanan Berjalan ({{ $activeCount }})
+            </a>
+            <a href="{{ route('vendor.orders.history') }}" class="btn btn-secondary btn-sm">
+                <i data-lucide="check-circle" style="width: 14px; height: 14px;"></i>
+                Riwayat Selesai ({{ $historyCount }})
+            </a>
+        </div>
     </div>
 
-    <!-- Navigation Tabs for Vendor -->
-    <div style="display: flex; gap: 10px; margin-bottom: 28px; border-bottom: 1px solid var(--color-border); padding-bottom: 12px; overflow-x: auto;">
-        <a href="{{ route('vendor.dashboard') }}" class="chip">Ringkasan</a>
-        <a href="{{ route('vendor.bundlings') }}" class="chip">Kelola Paket</a>
-        <a href="{{ route('vendor.galleries') }}" class="chip">Galeri Foto</a>
-        <a href="{{ route('vendor.orders') }}" class="chip active">Pesanan Masuk ({{ $orders->total() }})</a>
-        <a href="{{ route('vendor.profile') }}" class="chip">Profil Vendor</a>
-    </div>
+    @if(session('success'))
+        <div style="background-color: var(--color-success); color: var(--color-success-text); padding: 14px 20px; border-radius: 12px; margin-bottom: 24px; font-weight: 600; display: flex; align-items: center; gap: 10px; border: 1px solid rgba(11,114,64,0.2);">
+            <i data-lucide="check-circle" style="width: 18px; height: 18px;"></i>
+            <span>{{ session('success') }}</span>
+        </div>
+    @endif
 
-    <div class="card-dribbble" style="padding: 24px; border-radius: 14px;">
+    <div class="card-kabut" style="padding: 24px; border-radius: 14px; background: #fff;">
         <div class="table-responsive">
             <table class="table-dribbble">
                 <thead>
                     <tr>
                         <th>Kode Pesanan</th>
                         <th>Data Pelanggan</th>
-                        <th>Paket Dipesan</th>
+                        <th>Paket / Layanan Dipesan</th>
                         <th>Tanggal & Lokasi Acara</th>
                         <th>Total Tagihan</th>
                         <th>Status</th>
@@ -51,9 +59,24 @@
                                     <i data-lucide="phone" style="width: 11px; height: 11px; vertical-align: middle;"></i>
                                     {{ $order->customer_phone ?: ($order->customer->phone ?? '-') }}
                                 </div>
+                                <div style="margin-top: 4px;">
+                                    <a href="{{ route('vendor.chat', ['order_id' => $order->id]) }}" class="caption" style="display: inline-flex; align-items: center; gap: 4px; color: var(--primary); font-weight: 600;">
+                                        <i data-lucide="message-circle" style="width: 12px; height: 12px;"></i>
+                                        Chat Pelanggan
+                                    </a>
+                                </div>
                             </td>
                             <td>
-                                @if($order->bundling)
+                                @if($order->items && $order->items->isNotEmpty())
+                                    <div>
+                                        <strong>{{ $order->items->first()->item_name }}</strong>
+                                        @if($order->items->count() > 1)
+                                            <div class="caption" style="color: var(--primary); font-weight: 600;">
+                                                + {{ $order->items->count() - 1 }} item tambahan lainnya
+                                            </div>
+                                        @endif
+                                    </div>
+                                @elseif($order->bundling)
                                     <strong>{{ $order->bundling->package_name }}</strong>
                                     <div class="caption">Paket Bundling Utama</div>
                                 @elseif($order->serviceItem)
@@ -84,8 +107,6 @@
                                         'pending' => 'badge-amber',
                                         'approved' => 'badge-primary',
                                         'paid' => 'badge-accent',
-                                        'completed' => 'badge-success',
-                                        'cancelled' => 'badge-muted',
                                         default => 'badge-muted'
                                     };
                                 @endphp
@@ -102,7 +123,7 @@
                                                 Setujui Pesanan
                                             </button>
                                         </form>
-                                        <form action="{{ route('vendor.order.status', $order->id) }}" method="POST" onsubmit="return confirm('Batalkan pesanan ini?');">
+                                        <form action="{{ route('vendor.order.status', $order->id) }}" method="POST" onsubmit="return confirm('Tolak dan batalkan pesanan ini?');">
                                             @csrf
                                             @method('PUT')
                                             <input type="hidden" name="status" value="cancelled">
@@ -113,7 +134,7 @@
                                     @elseif($order->status === 'approved')
                                         <span class="caption" style="color: var(--color-secondary);">Menunggu Bayar</span>
                                     @elseif($order->status === 'paid')
-                                        <form action="{{ route('vendor.order.status', $order->id) }}" method="POST">
+                                        <form action="{{ route('vendor.order.status', $order->id) }}" method="POST" onsubmit="return confirm('Tandai acara ini telah selesai dilaksanakan?');">
                                             @csrf
                                             @method('PUT')
                                             <input type="hidden" name="status" value="completed">
@@ -121,17 +142,15 @@
                                                 Selesaikan Acara
                                             </button>
                                         </form>
-                                    @elseif($order->status === 'completed')
-                                        <span class="badge badge-success">Selesai</span>
-                                    @else
-                                        <span class="badge badge-muted">Dibatalkan</span>
                                     @endif
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" style="text-align: center; padding: 48px;">Belum ada pesanan masuk.</td>
+                            <td colspan="7" style="text-align: center; padding: 48px; color: var(--muted);">
+                                Tidak ada pesanan aktif atau berjalan saat ini.
+                            </td>
                         </tr>
                     @endforelse
                 </tbody>

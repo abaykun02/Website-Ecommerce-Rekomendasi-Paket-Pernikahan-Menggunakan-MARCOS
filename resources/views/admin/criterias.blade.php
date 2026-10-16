@@ -18,15 +18,6 @@
         </div>
     </div>
 
-    <!-- Admin Navigation Chips -->
-    <div style="display: flex; gap: 10px; margin-bottom: 32px; border-bottom: 1px solid var(--color-border); padding-bottom: 12px; overflow-x: auto;">
-        <a href="{{ route('admin.dashboard') }}" class="chip">Ringkasan</a>
-        <a href="{{ route('admin.criterias') }}" class="chip active">Kriteria & Bobot (C1-C7)</a>
-        <a href="{{ route('admin.evaluations') }}" class="chip">Matriks Evaluasi Alternatif</a>
-        <a href="{{ route('admin.orders') }}" class="chip">Pesanan & Pembayaran</a>
-        <a href="{{ route('admin.spk') }}" class="chip">Laporan Lengkap MARCOS</a>
-        <a href="{{ route('admin.users') }}" class="chip">Pengguna & Vendor</a>
-    </div>
 
     <!-- Criterias List -->
     <div class="card-dribbble" style="padding: 24px; border-radius: 14px; margin-bottom: 36px;">

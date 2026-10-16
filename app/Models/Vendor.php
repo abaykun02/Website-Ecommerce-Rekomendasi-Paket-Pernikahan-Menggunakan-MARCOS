@@ -51,6 +51,11 @@ class Vendor extends Model
         return $this->hasMany(Review::class);
     }
 
+    public function chatConversations(): HasMany
+    {
+        return $this->hasMany(ChatConversation::class);
+    }
+
     public function averageRating(): float
     {
         return round((float) $this->reviews()->avg('rating'), 1) ?: 5.0;

@@ -15,14 +15,6 @@
         </a>
     </div>
 
-    <!-- Navigation Tabs for Vendor -->
-    <div style="display: flex; gap: 10px; margin-bottom: 28px; border-bottom: 1px solid var(--color-border); padding-bottom: 12px; overflow-x: auto;">
-        <a href="{{ route('vendor.dashboard') }}" class="chip">Ringkasan</a>
-        <a href="{{ route('vendor.bundlings') }}" class="chip">Kelola Paket</a>
-        <a href="{{ route('vendor.galleries') }}" class="chip active">Galeri Foto</a>
-        <a href="{{ route('vendor.orders') }}" class="chip">Pesanan Masuk</a>
-        <a href="{{ route('vendor.profile') }}" class="chip">Profil Vendor</a>
-    </div>
 
     <!-- Form Unggah Foto -->
     <div class="card-dribbble" style="padding: 24px; border-radius: 14px; margin-bottom: 32px;">

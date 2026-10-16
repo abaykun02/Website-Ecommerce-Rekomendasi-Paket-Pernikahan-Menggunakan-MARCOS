@@ -89,6 +89,24 @@
 
                 @auth
                     @if(auth()->user()->isCustomer() || auth()->user()->isAdmin())
+                        <!-- Quick Actions: Tambah Keranjang & Chat Vendor -->
+                        <div style="display: flex; gap: 8px; margin-bottom: 20px;">
+                            <button type="button" onclick="openAddToCartServiceModal()" class="btn btn-secondary btn-block" style="flex: 1; height: 42px; justify-content: center; font-size: 13px;">
+                                <i data-lucide="shopping-cart" style="width: 15px; height: 15px;"></i>
+                                <span>+ Keranjang</span>
+                            </button>
+                            <a href="{{ route('customer.chat.start', $service->vendor_id) }}" class="btn btn-secondary" title="Chat Vendor Diskusi Layanan" style="height: 42px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0 14px; font-size: 13px;">
+                                <i data-lucide="message-circle" style="width: 15px; height: 15px; color: var(--primary);"></i>
+                                <span>Chat Vendor</span>
+                            </a>
+                        </div>
+
+                        <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; color: var(--muted); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                            <span style="flex: 1; height: 1px; background: var(--line);"></span>
+                            <span>Atau Pesan Langsung</span>
+                            <span style="flex: 1; height: 1px; background: var(--line);"></span>
+                        </div>
+
                         <form action="{{ route('customer.service.order.create', $service->id) }}" method="POST" id="checkoutServiceForm">
                             @csrf
                             
@@ -160,7 +178,12 @@
 
                             <button type="submit" class="btn btn-primary btn-block" style="height: 48px;">
                                 <i data-lucide="credit-card" style="width: 16px; height: 16px;"></i>
-                                <span>Pesan & Bayar via Midtrans</span>
+                                <span>Pesan & Bayar Langsung</span>
+                            </button>
+
+                            <button type="button" onclick="openAddToCartServiceModal()" class="btn btn-secondary btn-block" style="height: 44px; margin-top: 8px; justify-content: center; gap: 6px;">
+                                <i data-lucide="shopping-cart" style="width: 15px; height: 15px;"></i>
+                                <span>+ Masukkan ke Keranjang Terlebih Dahulu</span>
                             </button>
 
                             <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 10px;" class="caption">
@@ -207,6 +230,41 @@
                                     remEl.textContent = formatRupiah(0);
                                 }
                             }
+
+                            function openAddToCartServiceModal() {
+                                const modal = document.getElementById('addToCartServiceModal');
+                                if (modal) {
+                                    const bDate = document.getElementById('event_date')?.value;
+                                    const bLoc = document.getElementById('event_location')?.value;
+                                    const bNotes = document.getElementById('notes')?.value;
+                                    if (bDate && document.getElementById('cart_svc_event_date')) {
+                                        document.getElementById('cart_svc_event_date').value = bDate;
+                                    }
+                                    if (bLoc && document.getElementById('cart_svc_event_location')) {
+                                        document.getElementById('cart_svc_event_location').value = bLoc;
+                                    }
+                                    if (bNotes && document.getElementById('cart_svc_notes')) {
+                                        document.getElementById('cart_svc_notes').value = bNotes;
+                                    }
+                                    modal.style.display = 'flex';
+                                    modal.classList.add('show');
+                                    document.body.style.overflow = 'hidden';
+                                    if (window.lucide) lucide.createIcons();
+                                }
+                            }
+
+                            function closeAddToCartServiceModal() {
+                                const modal = document.getElementById('addToCartServiceModal');
+                                if (modal) {
+                                    modal.classList.remove('show');
+                                    modal.style.display = 'none';
+                                    document.body.style.overflow = '';
+                                }
+                            }
+
+                            document.getElementById('addToCartServiceModal')?.addEventListener('click', function(e) {
+                                if (e.target === this) closeAddToCartServiceModal();
+                            });
                         </script>
                     @else
                         <div style="background: var(--cream); border-radius: var(--radius-sm); padding: 18px; text-align: center; border: 1px solid var(--line);">
@@ -216,7 +274,11 @@
                     @endif
                 @else
                     <div style="background: var(--cream); border-radius: var(--radius-sm); padding: 22px; text-align: center; border: 1px solid var(--line);">
-                        <p class="body-sm" style="margin-bottom: 16px;">Silakan masuk atau buat akun pelanggan untuk memesan layanan ini.</p>
+                        <p class="body-sm" style="margin-bottom: 16px;">Silakan masuk atau buat akun pelanggan untuk memesan layanan ini atau berkonsultasi dengan vendor.</p>
+                        <a href="{{ route('customer.chat.start', $service->vendor_id) }}" class="btn btn-secondary btn-block" style="margin-bottom: 10px; justify-content: center; gap: 6px;">
+                            <i data-lucide="message-circle" style="width: 15px; height: 15px; color: var(--primary);"></i>
+                            <span>Chat Diskusi dengan Vendor</span>
+                        </a>
                         <a href="{{ route('login') }}" class="btn btn-primary btn-block" style="margin-bottom: 8px;">
                             Masuk untuk Memesan
                         </a>
@@ -229,4 +291,66 @@
         </div>
     </div>
 </div>
+
+<!-- Modal Tambah ke Keranjang untuk Layanan Satuan -->
+@auth
+<div id="addToCartServiceModal" class="admin-modal-backdrop" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="cartSvcModalTitle">
+    <div class="admin-modal-box" style="max-width: 480px; text-align: left;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border);">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(142,60,0,0.1); display: flex; align-items: center; justify-content: center; color: var(--primary);">
+                    <i data-lucide="shopping-cart" style="width: 18px; height: 18px;"></i>
+                </div>
+                <div>
+                    <h3 id="cartSvcModalTitle" style="margin: 0; font-size: 1.1rem; font-weight: 700;">Tambah ke Keranjang</h3>
+                    <div style="font-size: 11px; color: var(--muted);">Lengkapi rencana acara Anda sebelum disimpan</div>
+                </div>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="closeAddToCartServiceModal()" style="padding: 4px 8px; height: 30px;" aria-label="Tutup">
+                <i data-lucide="x" style="width: 16px; height: 16px;"></i>
+            </button>
+        </div>
+
+        <form action="{{ route('customer.cart.add') }}" method="POST">
+            @csrf
+            <input type="hidden" name="service_item_id" value="{{ $service->id }}">
+
+            <div style="background: var(--cream); border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; border: 1px solid var(--line);">
+                <div style="font-size: 11.5px; color: var(--muted);">Layanan:</div>
+                <div style="font-weight: 700; color: var(--ink); font-size: 14px;">{{ $service->name }}</div>
+                <div style="color: var(--rust); font-weight: 700; font-size: 13.5px; margin-top: 2px;">Rp {{ number_format($service->price, 0, ',', '.') }}</div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 14px;">
+                <label class="form-label" for="cart_svc_event_date">Tanggal Rencana Acara *</label>
+                <input type="date" name="event_date" id="cart_svc_event_date" class="form-input" min="{{ date('Y-m-d') }}" required>
+                <span class="caption" style="color: var(--muted); font-size: 11px; margin-top: 4px; display: block;">Wajib diisi agar vendor dapat memeriksa ketersediaan jadwal.</span>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 14px;">
+                <label class="form-label" for="cart_svc_event_location">Lokasi / Wilayah Acara</label>
+                <input type="text" name="event_location" id="cart_svc_event_location" class="form-input" placeholder="Contoh: Gedung Tiara Medan / Rumah Pengantin" value="{{ $service->vendor->city ?? '' }}">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 14px;">
+                <label class="form-label" for="cart_svc_quantity">Jumlah Pesanan</label>
+                <input type="number" name="quantity" id="cart_svc_quantity" class="form-input" min="1" max="10" value="1" required>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 18px;">
+                <label class="form-label" for="cart_svc_notes">Catatan Tambahan (Opsional)</label>
+                <textarea name="notes" id="cart_svc_notes" class="form-textarea" rows="2" placeholder="Contoh: Waktu pengerjaan mulai subuh jam 05.00 WIB..."></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; padding-top: 12px; border-top: 1px solid var(--border);">
+                <button type="button" class="btn btn-secondary" onclick="closeAddToCartServiceModal()">Batal</button>
+                <button type="submit" class="btn btn-primary">
+                    <i data-lucide="shopping-cart" style="width: 14px; height: 14px;"></i>
+                    <span>Masukkan ke Keranjang</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+@endauth
 @endsection
