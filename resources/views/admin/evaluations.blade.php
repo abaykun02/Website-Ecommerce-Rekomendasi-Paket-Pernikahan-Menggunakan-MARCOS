@@ -31,6 +31,12 @@
                 <span class="material-symbols-outlined" style="font-size: 16px; color: var(--primary);">download</span>
                 <span>Template Excel</span>
             </a>
+
+            <!-- Clear / Hapus Perhitungan Evaluasi Button -->
+            <button type="button" id="btnOpenClearEvaluations" class="btn btn-danger btn-sm" onclick="openClearEvaluationsModal()" style="background: #FEE2E2; color: #DC2626; border: 1px solid #FCA5A5; height: 38px; padding: 0 14px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;" title="Hapus seluruh data perhitungan evaluasi skor">
+                <span class="material-symbols-outlined" style="font-size: 18px;">delete_forever</span>
+                <span>Hapus Perhitungan</span>
+            </button>
         </div>
     </div>
 
@@ -69,7 +75,12 @@
                         @foreach($bundlings as $b)
                             <tr>
                                 <td>
-                                    <strong>{{ $b->package_name }}</strong>
+                                    <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;">
+                                        @if(!empty($b->code))
+                                            <span style="font-weight: 700; background: #0D0C22; color: #FFF; padding: 1px 6px; border-radius: 4px; font-size: 11px;">{{ $b->code }}</span>
+                                        @endif
+                                        <strong>{{ $b->package_name }}</strong>
+                                    </div>
                                     <div class="caption">{{ $b->vendor->vendor_name ?? '-' }} &bull; Rp {{ number_format($b->base_price, 0, ',', '.') }}</div>
                                 </td>
                                 @foreach($criterias as $c)
@@ -85,9 +96,11 @@
                                                 data-code="{{ $c->code }}"
                                                 class="select-pill evaluation-score-select" 
                                                 style="height: 38px; padding: 0 10px; font-size: 13px; text-align: center;">
-                                            <option value="1" {{ $currentScore == 1 ? 'selected' : '' }}>1 (Rendah)</option>
-                                            <option value="3" {{ $currentScore == 3 ? 'selected' : '' }}>3 (Sedang)</option>
-                                            <option value="5" {{ $currentScore == 5 ? 'selected' : '' }}>5 (Tinggi)</option>
+                                            <option value="1" {{ $currentScore == 1 ? 'selected' : '' }}>1</option>
+                                            <option value="2" {{ $currentScore == 2 ? 'selected' : '' }}>2</option>
+                                            <option value="3" {{ $currentScore == 3 ? 'selected' : '' }}>3</option>
+                                            <option value="4" {{ $currentScore == 4 ? 'selected' : '' }}>4</option>
+                                            <option value="5" {{ $currentScore == 5 ? 'selected' : '' }}>5</option>
                                         </select>
                                     </td>
                                 @endforeach
@@ -267,6 +280,92 @@
     </div>
 </div>
 
+<!-- ==========================================================================
+     MODAL 3: HAPUS EVALUASI SKOR (TWO-STEP VERIFICATION MODAL)
+     ========================================================================== -->
+<div id="clearEvaluationsModal" role="dialog" aria-modal="true" style="display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: #FFFFFF; border-radius: 16px; width: 95%; max-width: 520px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border: 1px solid #E2E8F0; overflow: hidden; animation: popIn 0.2s ease-out;">
+        
+        <!-- STEP 1: Konfirmasi Awal -->
+        <div id="clearStep1" style="padding: 28px 24px;">
+            <div style="display: flex; align-items: flex-start; gap: 14px; margin-bottom: 18px;">
+                <div style="width: 44px; height: 44px; border-radius: 12px; background: #FEE2E2; border: 1px solid #FECACA; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #DC2626;">
+                    <span class="material-symbols-outlined" style="font-size: 26px;">warning</span>
+                </div>
+                <div>
+                    <h3 style="font-family: var(--font-heading); font-size: 1.2rem; font-weight: 700; color: #1E293B; margin-bottom: 4px;">
+                        Hapus Seluruh Evaluasi Skor?
+                    </h3>
+                    <div style="font-size: 11.5px; color: #DC2626; font-weight: 600;">
+                        Langkah 1 dari 2: Konfirmasi Awal
+                    </div>
+                </div>
+            </div>
+
+            <p style="font-size: 13.5px; line-height: 1.6; color: #475569; margin-bottom: 24px;">
+                Apakah Anda yakin ingin menghapus seluruh data evaluasi skor alternatif ini? Tindakan ini akan mengosongkan seluruh matriks keputusan ($X$) dan perhitungan rekomendasi SPK MARCOS pada sistem.
+            </p>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" class="btn btn-secondary" onclick="closeClearEvaluationsModal()" style="cursor: pointer;">
+                    Batal
+                </button>
+                <button type="button" class="btn btn-danger" onclick="goToClearStep2()" style="background: #DC2626; border-color: #DC2626; color: #FFF; font-weight: 600; cursor: pointer;">
+                    Lanjut
+                </button>
+            </div>
+        </div>
+
+        <!-- STEP 2: Verifikasi Keamanan Cadangan File Excel -->
+        <div id="clearStep2" style="display: none; padding: 28px 24px;">
+            <div style="display: flex; align-items: flex-start; gap: 14px; margin-bottom: 18px;">
+                <div style="width: 44px; height: 44px; border-radius: 12px; background: #FEF3C7; border: 1px solid #FDE68A; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #B45309;">
+                    <span class="material-symbols-outlined" style="font-size: 26px;">shield_lock</span>
+                </div>
+                <div>
+                    <h3 style="font-family: var(--font-heading); font-size: 1.2rem; font-weight: 700; color: #1E293B; margin-bottom: 4px;">
+                        Verifikasi Keamanan Kedua
+                    </h3>
+                    <div style="font-size: 11.5px; color: #B45309; font-weight: 600;">
+                        Langkah 2 dari 2: Konfirmasi Cadangan File Excel
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: #FFFBEB; border: 1px solid #FCD34D; border-radius: 10px; padding: 14px 16px; margin-bottom: 20px;">
+                <p style="font-size: 13px; line-height: 1.6; color: #92400E; margin: 0;">
+                    <strong>Peringatan Penting:</strong> Untuk menghapus ini, Anda disarankan/harus menyimpan file Excel perhitungan yang sudah ada di sistem agar tidak terjadi hal yang tidak diinginkan kedepannya. Apakah Anda ingin menyimpan atau sudah menyimpan perhitungan yang sudah ada sebelumnya?
+                </p>
+            </div>
+
+            <div style="margin-bottom: 24px;">
+                <a href="{{ route('admin.evaluations.template-excel') }}" class="btn btn-secondary btn-sm" style="width: 100%; justify-content: center; height: 40px; border-color: #107C41; color: #107C41; font-weight: 600; gap: 6px; display: inline-flex; align-items: center;" title="Unduh file backup excel saat ini">
+                    <span class="material-symbols-outlined" style="font-size: 18px;">file_download</span>
+                    <span>Unduh Cadangan Excel Saat Ini (.csv)</span>
+                </a>
+            </div>
+
+            <form action="{{ route('admin.evaluations.clear') }}" method="POST">
+                @csrf
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; border-top: 1px solid #E2E8F0; padding-top: 18px;">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="goToClearStep1()" style="cursor: pointer;">
+                        &larr; Kembali
+                    </button>
+                    <div style="display: flex; gap: 8px;">
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="closeClearEvaluationsModal()" style="cursor: pointer;">
+                            Batal
+                        </button>
+                        <button type="submit" class="btn btn-danger btn-sm" style="background: #DC2626; border-color: #DC2626; color: #FFF; font-weight: 600; cursor: pointer;">
+                            Saya Sudah Simpan, Tetap Hapus
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+
 @push('scripts')
 <script>
     // Cell Click Interaction in Excel Viewer
@@ -322,6 +421,45 @@
             }, 250);
         }
     }
+
+    // Two-Step Verification Modal for Clearing Evaluations
+    function openClearEvaluationsModal() {
+        const modal = document.getElementById('clearEvaluationsModal');
+        if (modal) {
+            document.getElementById('clearStep1').style.display = 'block';
+            document.getElementById('clearStep2').style.display = 'none';
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    function closeClearEvaluationsModal() {
+        const modal = document.getElementById('clearEvaluationsModal');
+        if (modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+    }
+
+    function goToClearStep2() {
+        document.getElementById('clearStep1').style.display = 'none';
+        document.getElementById('clearStep2').style.display = 'block';
+    }
+
+    function goToClearStep1() {
+        document.getElementById('clearStep2').style.display = 'none';
+        document.getElementById('clearStep1').style.display = 'block';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnClear = document.getElementById('btnOpenClearEvaluations');
+        if (btnClear) {
+            btnClear.addEventListener('click', function(e) {
+                e.preventDefault();
+                openClearEvaluationsModal();
+            });
+        }
+    });
 
     // Drag and Drop Setup
     const dropZone = document.getElementById('excelDropZone');

@@ -32,11 +32,14 @@ class CustomerController extends Controller
             'customer_phone' => ['nullable', 'string', 'max:30'],
             'event_date' => ['required', 'date', 'after_or_equal:today'],
             'event_time' => ['nullable', 'string', 'max:50'],
+            'event_region' => ['nullable', 'string', 'max:100'],
             'event_location' => ['required', 'string', 'max:500'],
             'payment_type' => ['nullable', 'in:dp,full_payment'],
             'dp_percentage' => ['nullable', 'in:30,50'],
             'notes' => ['nullable', 'string', 'max:1000'],
         ]);
+
+        $eventRegion = $validated['event_region'] ?? \App\Models\Vendor::normalizeRegionName($validated['event_location']);
 
         $user = Auth::user();
         $totalPrice = (float) $bundling->base_price;
@@ -58,6 +61,7 @@ class CustomerController extends Controller
             'event_date' => $validated['event_date'],
             'event_time' => $validated['event_time'] ?: '08:00 WIB',
             'event_location' => $validated['event_location'],
+            'event_region' => $eventRegion,
             'total_price' => $totalPrice,
             'payment_type' => $paymentType,
             'dp_amount' => $dpAmount,
@@ -80,11 +84,15 @@ class CustomerController extends Controller
             'notes' => $validated['notes'] ?? null,
         ]);
 
-        // Generate Snap Token
-        $this->midtransService->createSnapToken($order);
+        // Generate Snap Token (opsional / safe)
+        try {
+            $this->midtransService->createSnapToken($order);
+        } catch (\Throwable $e) {
+            \Log::info('Midtrans snap token skipped: ' . $e->getMessage());
+        }
 
         return redirect()->route('customer.order.detail', $order->id)
-            ->with('success', 'Pesanan berhasil dibuat! Anda dapat langsung melakukan pembayaran melalui Midtrans.');
+            ->with('success', 'Pesanan berhasil dibuat! Silakan lakukan pembayaran melalui transfer bank atau gunakan opsi payment gateway.');
     }
 
     public function createServiceOrder(Request $request, $serviceItemId)
@@ -96,11 +104,14 @@ class CustomerController extends Controller
             'customer_phone' => ['nullable', 'string', 'max:30'],
             'event_date' => ['required', 'date', 'after_or_equal:today'],
             'event_time' => ['nullable', 'string', 'max:50'],
+            'event_region' => ['nullable', 'string', 'max:100'],
             'event_location' => ['required', 'string', 'max:500'],
             'payment_type' => ['nullable', 'in:dp,full_payment'],
             'dp_percentage' => ['nullable', 'in:30,50'],
             'notes' => ['nullable', 'string', 'max:1000'],
         ]);
+
+        $eventRegion = $validated['event_region'] ?? \App\Models\Vendor::normalizeRegionName($validated['event_location']);
 
         $user = Auth::user();
         $totalPrice = (float) $service->price;
@@ -122,6 +133,7 @@ class CustomerController extends Controller
             'event_date' => $validated['event_date'],
             'event_time' => $validated['event_time'] ?: '08:00 WIB',
             'event_location' => $validated['event_location'],
+            'event_region' => $eventRegion,
             'total_price' => $totalPrice,
             'payment_type' => $paymentType,
             'dp_amount' => $dpAmount,
@@ -144,11 +156,15 @@ class CustomerController extends Controller
             'notes' => $validated['notes'] ?? null,
         ]);
 
-        // Generate Snap Token
-        $this->midtransService->createSnapToken($order);
+        // Generate Snap Token (opsional / safe)
+        try {
+            $this->midtransService->createSnapToken($order);
+        } catch (\Throwable $e) {
+            \Log::info('Midtrans snap token skipped: ' . $e->getMessage());
+        }
 
         return redirect()->route('customer.order.detail', $order->id)
-            ->with('success', 'Pesanan layanan berhasil dibuat! Silakan lanjutkan pembayaran dengan Midtrans.');
+            ->with('success', 'Pesanan layanan berhasil dibuat! Silakan lanjutkan pembayaran dengan transfer bank atau payment gateway.');
     }
 
     public function orders()
@@ -163,7 +179,7 @@ class CustomerController extends Controller
 
     public function orderDetail($id)
     {
-        $order = Order::with(['bundling.galleries', 'serviceItem', 'vendor', 'payment', 'review', 'items'])
+        $order = Order::with(['bundling.galleries', 'bundling.vendor', 'serviceItem.vendor', 'vendor', 'payment', 'review', 'items.vendor'])
             ->where('customer_id', Auth::id())
             ->findOrFail($id);
 
@@ -207,7 +223,7 @@ class CustomerController extends Controller
 
         $order->update(['status' => 'paid']);
 
-        return back()->with('success', 'Bukti pembayaran berhasil diunggah! Menunggu verifikasi admin.');
+        return back()->with('success', 'Bukti pembayaran berhasil diunggah! Mitra vendor dapat memeriksa bukti pembayaran dan memproses pesanan Anda.');
     }
 
     public function submitReview(Request $request, $id)

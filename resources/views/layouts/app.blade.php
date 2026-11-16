@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="E-Marketplace Jasa Make-Up & Dekorasi Pernikahan B2C Berbasis Sistem Pendukung Keputusan MARCOS">
+    <meta name="description" content="E-Marketplace Jasa Make-Up & Dekorasi Pernikahan Terbaik di Sumatera Utara">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'E- Marketplace Make-Up & Dekorasi')</title>
     
@@ -39,6 +39,7 @@
     <header class="header-nav">
         @php
             $userUnreadChats = auth()->check() ? auth()->user()->unreadChatCount() : 0;
+            $pendingVendorsNavCount = auth()->check() && auth()->user()->isAdmin() ? \App\Models\Vendor::where('status', 'pending')->count() : 0;
         @endphp
         <div class="container-wide" style="width: 100%;">
             <div class="nav-inner">
@@ -60,8 +61,13 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('admin.vendors') }}" class="nav-link {{ request()->routeIs('admin.vendors*') ? 'active' : '' }}">
-                                    Mitra Vendor
+                                <a href="{{ route('admin.vendors') }}" class="nav-link {{ request()->routeIs('admin.vendors*') ? 'active' : '' }}" style="display: inline-flex; align-items: center; gap: 5px;">
+                                    <span>Mitra Vendor</span>
+                                    @if($pendingVendorsNavCount > 0)
+                                        <span class="badge" style="background: #F59E0B; color: #fff; font-size: 10px; padding: 1px 6px; border-radius: 10px; font-weight: 700;" title="{{ $pendingVendorsNavCount }} vendor menunggu verifikasi">
+                                            {{ $pendingVendorsNavCount }}
+                                        </span>
+                                    @endif
                                 </a>
                             </li>
                             <li>
@@ -104,8 +110,8 @@
                     </nav>
 
                     <div class="nav-actions">
-                        <a href="{{ route('home') }}" class="btn btn-secondary btn-sm" title="Lihat Tampilan Pengunjung" target="_blank" style="height: 32px; display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; padding: 0 10px;">
-                            <i data-lucide="external-link" style="width: 13px; height: 13px;"></i>
+                        <a href="{{ route('home') }}" class="btn btn-secondary btn-sm" title="Lihat Tampilan Web" style="height: 32px; display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; padding: 0 10px;">
+                            <i data-lucide="globe" style="width: 13px; height: 13px;"></i>
                             <span>Web</span>
                         </a>
                         <div style="display: flex; align-items: center; gap: 6px;">
@@ -180,15 +186,19 @@
                     </nav>
 
                     <div class="nav-actions">
-                        <a href="{{ route('home') }}" class="btn btn-secondary btn-sm" title="Lihat Tampilan Pengunjung" target="_blank" style="height: 32px; display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; padding: 0 10px;">
-                            <i data-lucide="external-link" style="width: 13px; height: 13px;"></i>
+                        <a href="{{ route('home') }}" class="btn btn-secondary btn-sm" title="Lihat Tampilan Web" style="height: 32px; display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; padding: 0 10px;">
+                            <i data-lucide="globe" style="width: 13px; height: 13px;"></i>
                             <span>Web</span>
                         </a>
-                        <div style="display: flex; align-items: center; gap: 6px;">
-                            <span class="badge badge-muted" style="font-size: 11px; height: 32px; padding: 0 10px; display: inline-flex; align-items: center; gap: 5px;">
-                                <i data-lucide="store" style="width: 12px; height: 12px;"></i>
-                                <span>{{ Str::limit(auth()->user()->name, 10) }}</span>
-                            </span>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <a href="{{ route('vendor.profile') }}" title="Profil Vendor" style="display: flex; align-items: center; gap: 6px; text-decoration: none;">
+                                @if(auth()->user()->vendor)
+                                    <img src="{{ auth()->user()->vendor->avatar_url }}" alt="{{ auth()->user()->name }}" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--color-primary); flex-shrink: 0; background: #FAF5EB;">
+                                @endif
+                                <span class="badge badge-muted" style="font-size: 11px; height: 32px; padding: 0 10px; display: inline-flex; align-items: center; gap: 5px;">
+                                    <span>{{ Str::limit(auth()->user()->vendor?->vendor_name ?? auth()->user()->name, 12) }}</span>
+                                </span>
+                            </a>
                         </div>
                         <!-- Tombol Garis Tiga (Hamburger Menu) -->
                         <button type="button" class="nav-toggle-btn" onclick="toggleNavDrawer()" aria-label="Buka Menu" title="Menu Navigasi" style="position: relative;">
@@ -229,9 +239,9 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('spk.rekomendasi') }}" class="nav-link {{ request()->routeIs('spk.rekomendasi') ? 'active' : '' }}" style="display: flex; align-items: center; gap: 5px;">
-                                    <span class="badge badge-moss" style="font-size: 9px; padding: 1px 5px;">SPK</span>
-                                    <span>MARCOS</span>
+                                <a href="{{ route('spk.rekomendasi') }}" class="nav-link {{ request()->routeIs('spk.rekomendasi') ? 'active' : '' }}" style="display: flex; align-items: center; gap: 6px;">
+                                    <i data-lucide="sparkles" style="width: 14px; height: 14px; color: var(--primary);"></i>
+                                    <span>Rekomendasi Paket</span>
                                 </a>
                             </li>
                         </ul>
@@ -350,9 +360,16 @@
                             </a>
                         </li>
                         <li class="nav-drawer-item">
-                            <a href="{{ route('admin.vendors') }}" class="{{ request()->routeIs('admin.vendors*') ? 'active' : '' }}">
-                                <i data-lucide="store" style="width: 16px; height: 16px;"></i>
-                                <span>Kelola Mitra Vendor</span>
+                            <a href="{{ route('admin.vendors') }}" class="{{ request()->routeIs('admin.vendors*') ? 'active' : '' }}" style="display: flex; align-items: center; justify-content: space-between;">
+                                <div style="display: inline-flex; align-items: center; gap: 8px;">
+                                    <i data-lucide="store" style="width: 16px; height: 16px;"></i>
+                                    <span>Kelola Mitra Vendor</span>
+                                </div>
+                                @if($pendingVendorsNavCount > 0)
+                                    <span class="badge" style="background: #F59E0B; color: #fff; font-size: 10px; padding: 1px 6px; border-radius: 10px; font-weight: 700;">
+                                        {{ $pendingVendorsNavCount }}
+                                    </span>
+                                @endif
                             </a>
                         </li>
                         <li class="nav-drawer-item">
@@ -397,8 +414,8 @@
                             </a>
                         </li>
                         <li class="nav-drawer-item" style="margin-top: 8px; border-top: 1px dashed var(--line); padding-top: 8px;">
-                            <a href="{{ route('home') }}" target="_blank">
-                                <i data-lucide="external-link" style="width: 16px; height: 16px;"></i>
+                            <a href="{{ route('home') }}">
+                                <i data-lucide="globe" style="width: 16px; height: 16px;"></i>
                                 <span>Lihat Tampilan Web</span>
                             </a>
                         </li>
@@ -459,8 +476,8 @@
                             </a>
                         </li>
                         <li class="nav-drawer-item" style="margin-top: 8px; border-top: 1px dashed var(--line); padding-top: 8px;">
-                            <a href="{{ route('home') }}" target="_blank">
-                                <i data-lucide="external-link" style="width: 16px; height: 16px;"></i>
+                            <a href="{{ route('home') }}">
+                                <i data-lucide="globe" style="width: 16px; height: 16px;"></i>
                                 <span>Lihat Tampilan Web</span>
                             </a>
                         </li>
@@ -496,8 +513,8 @@
                         </li>
                         <li class="nav-drawer-item">
                             <a href="{{ route('spk.rekomendasi') }}" class="{{ request()->routeIs('spk.rekomendasi') ? 'active' : '' }}">
-                                <i data-lucide="award" style="width: 16px; height: 16px;"></i>
-                                <span>Rekomendasi SPK MARCOS</span>
+                                <i data-lucide="sparkles" style="width: 16px; height: 16px;"></i>
+                                <span>Rekomendasi Paket</span>
                             </a>
                         </li>
 
@@ -637,11 +654,11 @@
                         <span class="logo-dot"></span>
                     </div>
                     <p class="body-sm" style="max-width: 360px; margin-bottom: 14px; line-height: 1.55;">
-                        E-Marketplace Jasa Make-Up & Dekorasi Pernikahan B2C. Didukung algoritma Sistem Pendukung Keputusan (SPK) metode <strong>MARCOS</strong> untuk menghitung rekomendasi terbaik dengan pembobotan preferensi dinamis.
+                        Platform e-marketplace penyedia jasa make-up artist, busana pengantin, dan dekorasi pelaminan pernikahan terbaik di Sumatera Utara. Temukan paket terbaik untuk momen bahagia Anda.
                     </p>
                     <div style="display: flex; gap: 6px;">
-                        <span class="badge badge-moss">SPK MARCOS</span>
-                        <span class="badge badge-outline">B2C Marketplace</span>
+                        <span class="badge badge-moss">Pilihan Terpercaya</span>
+                        <span class="badge badge-outline">Koleksi Lengkap</span>
                     </div>
                 </div>
 
@@ -652,7 +669,7 @@
                         <li><a href="{{ route('services') }}">Kategori & Layanan</a></li>
                         <li><a href="{{ route('bundlings') }}">Paket Bundling</a></li>
                         <li><a href="{{ route('vendors') }}">Direktori Vendor</a></li>
-                        <li><a href="{{ route('spk.rekomendasi') }}">Rekomendasi SPK</a></li>
+                        <li><a href="{{ route('spk.rekomendasi') }}">Rekomendasi Paket</a></li>
                     </ul>
                 </div>
 
@@ -667,15 +684,15 @@
                 </div>
 
                 <div class="footer-col">
-                    <h4>Kriteria Evaluasi</h4>
+                    <h4>Kriteria Evaluasi SPK</h4>
                     <ul class="footer-links" style="font-size: 0.78rem;">
-                        <li>C1: Kualitas Riasan (20%)</li>
-                        <li>C2: Estetika & Desain (20%)</li>
-                        <li>C3: Kelengkapan Fasilitas (15%)</li>
-                        <li>C4: Rating & Ulasan (10%)</li>
-                        <li>C5: Harga Layanan (Cost, 20%)</li>
-                        <li>C6: Lokasi & Respon (10%)</li>
-                        <li>C7: Kualitas Bahan/Alat (5%)</li>
+                        <li>C1: Harga</li>
+                        <li>C2: Biaya Tambahan</li>
+                        <li>C3: Kelengkapan</li>
+                        <li>C4: Fleksibilitas Layanan</li>
+                        <li>C5: Kualitas Hasil</li>
+                        <li>C6: Risiko Kerusakan</li>
+                        <li>C7: Estetika dan Desain</li>
                     </ul>
                 </div>
             </div>
@@ -716,9 +733,177 @@
         </div>
     </div>
 
+    <!-- Modal Konfirmasi Tindakan / Hapus Elegan (Custom Pop-Up Tanpa Browser Dialog) -->
+    <div id="globalConfirmModal" class="modal-backdrop-luxury" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="globalConfirmTitle">
+        <div class="modal-box-luxury" style="max-width: 440px; text-align: center; border: 1px solid rgba(229,72,77,0.3); box-shadow: 0 20px 45px rgba(0,0,0,0.22); animation: modalBounceIn 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+            <div id="globalConfirmIcon" class="modal-icon-luxury" style="background: linear-gradient(135deg, #FFF5F5 0%, #FEE2E2 100%); border: 1.5px solid rgba(229,72,77,0.4); color: #DC2626; box-shadow: 0 4px 14px rgba(220,38,38,0.2); display: flex; align-items: center; justify-content: center; width: 60px; height: 60px; margin: 0 auto 16px; border-radius: 50%;">
+                <i data-lucide="trash-2" style="width: 28px; height: 28px;"></i>
+            </div>
+            
+            <h3 id="globalConfirmTitle" class="modal-title-luxury" style="font-size: 20px; color: #111827; margin-bottom: 8px;">
+                Konfirmasi Hapus
+            </h3>
+            
+            <p id="globalConfirmDesc" class="modal-desc-luxury" style="font-size: 13.5px; color: #4B5563; line-height: 1.6; margin-bottom: 24px; padding: 0 8px;">
+                Apakah Anda yakin ingin menghapus ini?
+            </p>
+
+            <div class="modal-actions-luxury" style="display: flex; justify-content: center; gap: 12px;">
+                <button type="button" class="btn btn-secondary" onclick="closeGlobalConfirmModal()" style="min-width: 110px; height: 42px; font-size: 13.5px;">
+                    Batal
+                </button>
+                <button type="button" id="globalConfirmSubmitBtn" class="btn btn-primary" style="min-width: 130px; height: 42px; font-size: 13.5px; background-color: var(--color-error); border-color: var(--color-error); color: #FFFFFF; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+                    <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                    <span id="globalConfirmBtnText">Ya, Hapus</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Init Lucide Icons & Interceptions -->
     <script>
         lucide.createIcons();
+
+        /* Global Confirm Modal (Custom Pop-up Dialog) */
+        let pendingConfirmForm = null;
+
+        function showConfirmModal(options) {
+            const modal = document.getElementById('globalConfirmModal');
+            if (!modal) return;
+
+            const titleEl = document.getElementById('globalConfirmTitle');
+            const descEl = document.getElementById('globalConfirmDesc');
+            const submitBtn = document.getElementById('globalConfirmSubmitBtn');
+            const btnTextEl = document.getElementById('globalConfirmBtnText');
+            const iconContainer = document.getElementById('globalConfirmIcon');
+
+            const isDelete = options.isDelete !== false;
+            const title = options.title || (isDelete ? 'Konfirmasi Hapus' : 'Konfirmasi Tindakan');
+            const message = options.message || (isDelete ? 'Apakah Anda yakin ingin menghapus ini?' : 'Apakah Anda yakin ingin melanjutkan tindakan ini?');
+            const confirmText = options.confirmText || (isDelete ? 'Ya, Hapus' : 'Ya, Lanjutkan');
+
+            if (titleEl) titleEl.innerText = title;
+            if (descEl) descEl.innerText = message;
+            if (btnTextEl) btnTextEl.innerText = confirmText;
+
+            if (submitBtn) {
+                if (isDelete) {
+                    submitBtn.style.backgroundColor = 'var(--color-error, #E5484D)';
+                    submitBtn.style.borderColor = 'var(--color-error, #E5484D)';
+                    submitBtn.style.color = '#FFFFFF';
+                } else {
+                    submitBtn.style.backgroundColor = 'var(--primary, #8E3C00)';
+                    submitBtn.style.borderColor = 'var(--primary, #8E3C00)';
+                    submitBtn.style.color = '#FFFFFF';
+                }
+            }
+
+            if (iconContainer) {
+                if (isDelete) {
+                    iconContainer.style.background = 'linear-gradient(135deg, #FFF5F5 0%, #FEE2E2 100%)';
+                    iconContainer.style.border = '1.5px solid rgba(229,72,77,0.4)';
+                    iconContainer.style.color = '#DC2626';
+                    iconContainer.innerHTML = '<i data-lucide="trash-2" style="width: 28px; height: 28px;"></i>';
+                } else {
+                    iconContainer.style.background = 'linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%)';
+                    iconContainer.style.border = '1.5px solid rgba(217,119,6,0.4)';
+                    iconContainer.style.color = '#D97706';
+                    iconContainer.innerHTML = '<i data-lucide="alert-triangle" style="width: 28px; height: 28px;"></i>';
+                }
+            }
+
+            pendingConfirmForm = options.form || null;
+
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('active'), 10);
+            document.body.style.overflow = 'hidden';
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function closeGlobalConfirmModal() {
+            const modal = document.getElementById('globalConfirmModal');
+            if (modal) {
+                modal.classList.remove('active');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                    document.body.style.overflow = '';
+                }, 250);
+            }
+            pendingConfirmForm = null;
+        }
+
+        function confirmDelete(event, form, message = 'Apakah Anda yakin ingin menghapus ini?', title = 'Konfirmasi Hapus') {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            showConfirmModal({
+                form: form,
+                title: title,
+                message: message,
+                confirmText: 'Ya, Hapus',
+                isDelete: true
+            });
+            return false;
+        }
+
+        function confirmAction(event, form, message = 'Apakah Anda yakin ingin melanjutkan tindakan ini?', title = 'Konfirmasi Tindakan', confirmText = 'Ya, Lanjutkan') {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            showConfirmModal({
+                form: form,
+                title: title,
+                message: message,
+                confirmText: confirmText,
+                isDelete: false
+            });
+            return false;
+        }
+
+        document.getElementById('globalConfirmSubmitBtn')?.addEventListener('click', function() {
+            if (pendingConfirmForm) {
+                const targetForm = pendingConfirmForm;
+                pendingConfirmForm = null;
+                closeGlobalConfirmModal();
+                HTMLFormElement.prototype.submit.call(targetForm);
+            } else {
+                closeGlobalConfirmModal();
+            }
+        });
+
+        // Close on backdrop click
+        document.getElementById('globalConfirmModal')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeGlobalConfirmModal();
+            }
+        });
+
+        // Global capture-phase submit interception: cegat semua form yang menggunakan confirm(...) bawaan browser
+        document.addEventListener('submit', function(e) {
+            const form = e.target;
+            if (form && form.hasAttribute('onsubmit')) {
+                const onsubmitAttr = form.getAttribute('onsubmit');
+                if (onsubmitAttr && onsubmitAttr.includes('confirm(')) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    
+                    const match = onsubmitAttr.match(/confirm\s*\(\s*['"](.*?)['"]\s*\)/);
+                    const msg = match ? match[1] : 'Apakah Anda yakin ingin menghapus ini?';
+                    const isDel = msg.toLowerCase().includes('hapus') || msg.toLowerCase().includes('delete') || msg.toLowerCase().includes('permanen');
+                    
+                    showConfirmModal({
+                        form: form,
+                        title: isDel ? 'Konfirmasi Hapus' : 'Konfirmasi Tindakan',
+                        message: msg,
+                        confirmText: isDel ? 'Ya, Hapus' : 'Ya, Lanjutkan',
+                        isDelete: isDel
+                    });
+                    return false;
+                }
+            }
+        }, true);
 
         /* Mobile & Responsive Offcanvas Navigation Drawer */
         function openNavDrawer() {
@@ -791,6 +976,7 @@
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 closeLogoutModal();
+                closeGlobalConfirmModal();
                 closeNavDrawer();
             }
         });

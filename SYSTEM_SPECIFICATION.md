@@ -107,14 +107,14 @@
 
 ## 3. SEEDER DATA ASLI PROPOSAL (`DatabaseSeeder.php`)
 
-### 3.1 Data Kriteria & Bobot (`CriteriaSeeder.php`)
-1. **C1**: Kualitas Hasil | Benefit | Bobot: 0.20 (20%)
-2. **C2**: Estetika & Desain | Benefit | Bobot: 0.20 (20%)
+### 3.1 Data Kriteria & Bobot (`CriteriaSeeder.php`) - MARCOS Ilmiah Audit
+1. **C1**: Harga | Cost | Bobot: 0.20 (20%)
+2. **C2**: Biaya Tambahan | Cost | Bobot: 0.10 (10%)
 3. **C3**: Kelengkapan | Benefit | Bobot: 0.15 (15%)
-4. **C4**: Rating & Ulasan | Benefit | Bobot: 0.10 (10%)
-5. **C5**: Harga | Cost | Bobot: 0.20 (20%)
+4. **C4**: Fleksibilitas Layanan | Benefit | Bobot: 0.10 (10%)
+5. **C5**: Kualitas Hasil | Benefit | Bobot: 0.20 (20%)
 6. **C6**: Risiko Kerusakan | Cost | Bobot: 0.05 (5%)
-7. **C7**: Biaya Tambahan | Cost | Bobot: 0.10 (10%)
+7. **C7**: Estetika dan Desain | Benefit | Bobot: 0.20 (20%)
 
 ### 3.2 Data Vendor (`VendorSeeder.php`)
 1. **Dyra Erlia Make-Up & Decoration**

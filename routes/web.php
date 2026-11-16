@@ -110,6 +110,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/spk-marcos/export-excel', [AdminController::class, 'exportMarcosExcel'])->name('spk.export-excel');
     Route::get('/evaluasi/template-excel', [AdminController::class, 'downloadExcelTemplate'])->name('evaluations.template-excel');
     Route::post('/evaluasi/import-excel', [AdminController::class, 'importExcelEvaluations'])->name('evaluations.import-excel');
+    Route::post('/evaluasi/clear', [AdminController::class, 'clearEvaluations'])->name('evaluations.clear');
 
     // Admin Users Management (Requirement 7)
     Route::get('/pengguna', [AdminController::class, 'users'])->name('users');
@@ -119,6 +120,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // Admin Vendors Management (Requirement 7)
     Route::get('/vendor', [AdminController::class, 'vendors'])->name('vendors');
+    Route::post('/vendor/{id}/setujui', [AdminController::class, 'approveVendor'])->name('vendor.approve');
+    Route::post('/vendor/{id}/tolak', [AdminController::class, 'rejectVendor'])->name('vendor.reject');
     Route::put('/vendor/{id}', [AdminController::class, 'updateVendor'])->name('vendor.update');
     Route::delete('/vendor/{id}', [AdminController::class, 'deleteVendor'])->name('vendor.delete');
 

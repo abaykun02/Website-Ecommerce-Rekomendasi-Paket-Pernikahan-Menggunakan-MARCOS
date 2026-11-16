@@ -42,4 +42,17 @@ class ServiceItem extends Model
     {
         return $this->hasMany(Order::class, 'service_item_id');
     }
+
+    public function getImageUrlAttribute(?string $value): string
+    {
+        if (empty($value)) {
+            return asset('storage/catalog_photos/Medium Pakage.jpeg');
+        }
+
+        if (str_starts_with($value, 'http://') || str_starts_with($value, 'https://')) {
+            return $value;
+        }
+
+        return asset('storage/' . $value);
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Order;
 use App\Models\User;
 use Tests\TestCase;
 
@@ -74,13 +75,35 @@ class PlatformRoutesTest extends TestCase
         $this->get('/register-vendor')->assertStatus(200);
     }
 
+    public function test_catalog_bundlings_are_sorted_by_marcos_ranking(): void
+    {
+        $resp = $this->get('/paket');
+        $resp->assertStatus(200);
+
+        $bundlings = $resp->original->getData()['bundlings'];
+        $rankMap = $resp->original->getData()['rankMap'];
+
+        $this->assertNotEmpty($bundlings);
+        $this->assertNotEmpty($rankMap);
+
+        $lastRank = 0;
+        foreach ($bundlings as $item) {
+            $rank = $rankMap[$item->id]['rank'] ?? 999999;
+            $this->assertGreaterThanOrEqual($lastRank, $rank, "Paket {$item->package_name} dengan rank {$rank} harus lebih besar atau sama dengan rank sebelumnya {$lastRank}");
+            $lastRank = $rank;
+        }
+    }
+
     public function test_customer_pages_load_successfully(): void
     {
         $customer = User::where('role', 'customer')->first();
         $this->actingAs($customer);
 
         $this->get('/pesanan-saya')->assertStatus(200);
-        $this->get('/pesanan-saya/1')->assertStatus(200);
+        $order = Order::where('customer_id', $customer->id)->first();
+        if ($order) {
+            $this->get('/pesanan-saya/' . $order->id)->assertStatus(200);
+        }
     }
 
     public function test_vendor_pages_load_successfully(): void

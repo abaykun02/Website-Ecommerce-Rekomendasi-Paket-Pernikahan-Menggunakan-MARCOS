@@ -31,15 +31,22 @@
     <div class="grid-cards" style="margin-bottom: 40px;">
         @forelse($vendors as $vendor)
             @php
-                $photo = $vendor->galleries->first()?->url 
-                    ?? 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&q=80';
+                $photo = $vendor->hasCover() 
+                    ? $vendor->cover_url 
+                    : ($vendor->galleries->first()?->url ?? 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&q=80');
             @endphp
             <div class="card-dribbble" style="display: flex; flex-direction: column; justify-content: space-between;">
                 <div>
                     <div style="position: relative; margin-bottom: 16px;">
                         <img src="{{ $photo }}" alt="{{ $vendor->vendor_name }}" class="img-cover-box" style="height: 180px;">
-                        <div style="position: absolute; bottom: -18px; left: 16px; width: 44px; height: 44px; border-radius: 50%; background: var(--color-primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; border: 2px solid white; box-shadow: var(--shadow-subtle);">
-                            {{ strtoupper(substr($vendor->vendor_name, 0, 1)) }}
+                        <div style="position: absolute; bottom: -18px; left: 16px; width: 48px; height: 48px; border-radius: 50%; overflow: hidden; border: 2.5px solid white; box-shadow: var(--shadow-subtle); background: var(--color-primary);">
+                            @if($vendor->hasAvatar())
+                                <img src="{{ $vendor->avatar_url }}" alt="{{ $vendor->vendor_name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                            @else
+                                <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 16px;">
+                                    {{ strtoupper(substr($vendor->vendor_name, 0, 1)) }}
+                                </div>
+                            @endif
                         </div>
                     </div>
 

@@ -8,14 +8,13 @@
         <div style="text-align: center; margin-bottom: 24px;">
             <span class="badge badge-accent" style="margin-bottom: 8px;">Kemitraan Vendor</span>
             <h1 class="headline-md" style="margin-bottom: 6px;">Pendaftaran Mitra Make-Up & Dekorasi</h1>
-            <p class="body-sm">Bergabung dalam jaringan vendor pernikahan terkurasi di Glow & Grace</p>
         </div>
 
         <form action="{{ route('register.vendor') }}" method="POST">
             @csrf
             
             <div class="label-md" style="color: var(--color-primary); margin-bottom: 12px; font-weight: 700; border-bottom: 1px solid var(--color-border); padding-bottom: 6px;">
-                1. Profil Usaha Vendor
+                Profil Usaha Vendor
             </div>
 
             <div class="form-group">
@@ -50,7 +49,7 @@
             </div>
 
             <div class="label-md" style="color: var(--color-primary); margin: 20px 0 12px; font-weight: 700; border-bottom: 1px solid var(--color-border); padding-bottom: 6px;">
-                2. Kredensial Login Vendor
+                Kredensial Login Vendor
             </div>
 
             <div class="form-group">

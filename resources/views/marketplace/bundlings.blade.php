@@ -9,7 +9,7 @@
         <span class="badge badge-moss" style="margin-bottom: 10px;">Katalog Terpadu</span>
         <h1 class="headline-lg" style="margin-bottom: 10px; font-weight: 500;">Semua Paket Make-Up & Dekorasi</h1>
         <p class="body-md" style="line-height: 1.6; color: var(--body);">
-            Pilih paket pernikahan lengkap dari vendor terpercaya dengan transparansi rincian fasilitas dan dukungan evaluasi SPK MARCOS.
+            Pilih paket pernikahan lengkap dari vendor terpercaya dengan transparansi rincian fasilitas dan jaminan kualitas terbaik.
         </p>
     </div>
 
@@ -26,10 +26,10 @@
             <div class="filter-item">
                 <label for="bundling-vendor-select">Mitra Vendor</label>
                 <select id="bundling-vendor-select" name="vendor_id" class="form-select" style="color: #1B1C1A; background-color: #FFFFFF;">
-                    <option value="" style="color: #1B1C1A;">Semua Vendor ({{ $vendors->count() }})</option>
+                    <option value="" style="color: #1B1C1A;">Semua Mitra Vendor ({{ $vendors->count() }})</option>
                     @foreach($vendors as $v)
                         <option value="{{ $v->id }}" {{ request('vendor_id') == $v->id ? 'selected' : '' }} style="color: #1B1C1A;">
-                            {{ $v->vendor_name }}
+                            {{ $v->vendor_name }} ({{ $v->bundlings_count }} Paket)
                         </option>
                     @endforeach
                 </select>
@@ -58,6 +58,21 @@
                 @endif
             </div>
         </form>
+    </div>
+
+    <!-- Info Urutan Berdasarkan Ranking SPK MARCOS -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; background: rgba(255,255,255,0.7); padding: 12px 18px; border-radius: 12px; border: 1px solid var(--border);">
+        <div style="font-size: 13.5px; color: var(--body); display: flex; align-items: center; gap: 8px;">
+            <div style="width: 28px; height: 28px; border-radius: 6px; background: rgba(142, 60, 0, 0.1); display: flex; align-items: center; justify-content: center; color: var(--primary); flex-shrink: 0;">
+                <i data-lucide="award" style="width: 16px; height: 16px;"></i>
+            </div>
+            <span>
+                Menampilkan <strong>{{ $bundlings->total() }}</strong> paket pernikahan, diurutkan berdasarkan <strong>Peringkat Rekomendasi SPK MARCOS</strong> (Peringkat #1 teratas).
+            </span>
+        </div>
+        <div style="font-size: 12.5px; color: var(--muted); font-weight: 500;">
+            Halaman {{ $bundlings->currentPage() }} dari {{ $bundlings->lastPage() ?: 1 }}
+        </div>
     </div>
 
     <!-- Bundling Grid (Standard E-Commerce Proportions) -->
@@ -110,9 +125,25 @@
 
                     <h3 class="product-card__name">
                         <a href="{{ route('bundling.detail', $item->id) }}">
+                            @if(!empty($item->code))
+                                <span style="font-size: 11px; font-weight: 700; background: #1E293B; color: #FFFFFF; padding: 2px 7px; border-radius: 4px; margin-right: 4px; display: inline-block;">{{ $item->code }}</span>
+                            @endif
                             {{ $item->package_name }}
                         </a>
                     </h3>
+
+                    @if(!empty($item->features) && count($item->features) > 0)
+                        <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px;">
+                            @foreach(array_slice($item->features, 0, 2) as $feat)
+                                <span style="font-size: 11px; background: #F1F5F9; color: #334155; padding: 2px 7px; border-radius: 4px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                    ✓ {{ Str::limit($feat, 26) }}
+                                </span>
+                            @endforeach
+                            @if(count($item->features) > 2)
+                                <span style="font-size: 10.5px; color: #64748B; padding: 2px 4px;">+{{ count($item->features) - 2 }} fasilitas</span>
+                            @endif
+                        </div>
+                    @endif
 
                     <p class="product-card__desc">
                         {{ $item->description }}

@@ -4,50 +4,64 @@
 
 @section('content')
 <div class="container-wide" style="padding-top: 36px; padding-bottom: 64px;">
-    <!-- Vendor Profile Header Card -->
-    <div class="card-dribbble" style="padding: 32px; border-radius: 16px; margin-bottom: 36px;">
-        <div style="display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-start; justify-content: space-between;">
-            <div style="display: flex; gap: 20px; align-items: center;">
-                <div style="width: 76px; height: 76px; border-radius: 50%; background: var(--color-primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 800; flex-shrink: 0;">
-                    {{ strtoupper(substr($vendor->vendor_name, 0, 2)) }}
-                </div>
-                <div>
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
-                        <h1 class="headline-md">{{ $vendor->vendor_name }}</h1>
-                        <span class="badge badge-accent">Mitra Terverifikasi</span>
-                    </div>
-                    <div class="body-sm" style="margin-bottom: 6px;">
-                        Owner: <strong>{{ $vendor->owner_name }}</strong> &bull; {{ $vendor->bundlings->count() }} Paket Layanan
-                    </div>
-                    <div class="body-sm" style="display: flex; align-items: center; gap: 6px; color: var(--color-secondary);">
-                        <i data-lucide="map-pin" style="width: 14px; height: 14px;"></i>
-                        <span>{{ $vendor->location_address }}</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Action CTAs -->
-            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                <a href="{{ route('customer.chat.start', $vendor->id) }}" class="btn btn-primary btn-sm" style="display: inline-flex; align-items: center; gap: 6px;">
-                    <i data-lucide="messages-square" style="width: 15px; height: 15px;"></i>
-                    <span>Chat Vendor Langsung</span>
-                </a>
-                <a href="{{ $vendor->maps_url }}" target="_blank" class="btn btn-secondary btn-sm">
-                    <i data-lucide="navigation" style="width: 14px; height: 14px;"></i>
-                    Peta Lokasi Google Maps
-                </a>
-                <a href="{{ $vendor->whatsapp_url }}" target="_blank" class="btn btn-secondary btn-sm" style="color: #16A34A; display: inline-flex; align-items: center; gap: 6px;">
-                    <i data-lucide="message-circle" style="width: 15px; height: 15px;"></i>
-                    WhatsApp
-                </a>
-            </div>
+    <!-- Vendor Profile Header Card with Cover Banner -->
+    <div class="card-dribbble" style="padding: 0; overflow: hidden; border-radius: 16px; margin-bottom: 36px;">
+        <!-- Cover Banner -->
+        <div style="position: relative; width: 100%; height: 200px; background: #262626;">
+            <img src="{{ $vendor->cover_url }}" alt="Cover {{ $vendor->vendor_name }}" style="width: 100%; height: 100%; object-fit: cover;">
+            <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.6) 100%);"></div>
         </div>
 
-        @if($vendor->description)
-            <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--color-border);" class="body-md">
-                {{ $vendor->description }}
+        <div style="padding: 0 32px 32px; margin-top: -48px; position: relative; z-index: 2;">
+            <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-end; justify-content: space-between; margin-bottom: 20px;">
+                <div style="display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap;">
+                    <div style="width: 96px; height: 96px; border-radius: 50%; overflow: hidden; border: 4px solid #fff; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2); flex-shrink: 0; background: var(--color-primary);">
+                        @if($vendor->hasAvatar())
+                            <img src="{{ $vendor->avatar_url }}" alt="{{ $vendor->vendor_name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        @else
+                            <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-size: 32px; font-weight: 800;">
+                                {{ strtoupper(substr($vendor->vendor_name, 0, 2)) }}
+                            </div>
+                        @endif
+                    </div>
+                    <div style="padding-bottom: 4px;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+                            <h1 class="headline-md" style="margin: 0;">{{ $vendor->vendor_name }}</h1>
+                            <span class="badge badge-accent">Mitra Terverifikasi</span>
+                        </div>
+                        <div class="body-sm" style="margin-bottom: 6px;">
+                            Owner: <strong>{{ $vendor->owner_name }}</strong> &bull; {{ $vendor->bundlings->count() }} Paket Layanan
+                        </div>
+                        <div class="body-sm" style="display: flex; align-items: center; gap: 6px; color: var(--color-secondary);">
+                            <i data-lucide="map-pin" style="width: 14px; height: 14px;"></i>
+                            <span>{{ $vendor->location_address }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action CTAs -->
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding-bottom: 4px;">
+                    <a href="{{ route('customer.chat.start', $vendor->id) }}" class="btn btn-primary btn-sm" style="display: inline-flex; align-items: center; gap: 6px;">
+                        <i data-lucide="messages-square" style="width: 15px; height: 15px;"></i>
+                        <span>Chat Vendor Langsung</span>
+                    </a>
+                    <a href="{{ $vendor->maps_url }}" target="_blank" class="btn btn-secondary btn-sm">
+                        <i data-lucide="navigation" style="width: 14px; height: 14px;"></i>
+                        Peta Lokasi Google Maps
+                    </a>
+                    <a href="{{ $vendor->whatsapp_url }}" target="_blank" class="btn btn-secondary btn-sm" style="color: #16A34A; display: inline-flex; align-items: center; gap: 6px;">
+                        <i data-lucide="message-circle" style="width: 15px; height: 15px;"></i>
+                        WhatsApp
+                    </a>
+                </div>
             </div>
-        @endif
+
+            @if($vendor->description)
+                <div style="padding-top: 18px; border-top: 1px solid var(--color-border);" class="body-md">
+                    {{ $vendor->description }}
+                </div>
+            @endif
+        </div>
     </div>
 
     <!-- Section: Paket Bundling Vendor -->

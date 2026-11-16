@@ -21,15 +21,34 @@
                     ?? $bundling->vendor->galleries->first()?->url 
                     ?? 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80';
             @endphp
-            <div style="margin-bottom: 16px; border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--line); background: var(--line);">
-                <img id="mainGalleryImg" src="{{ $mainImg }}" alt="{{ $bundling->package_name }}" style="width: 100%; max-height: 480px; object-fit: cover; display: block;" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80';">
+            <div style="margin-bottom: 12px; border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--line); background: #141E1C; display: flex; align-items: center; justify-content: center; min-height: 480px; box-shadow: 0 4px 20px rgba(0,0,0,0.06);">
+                <img id="mainGalleryImg" src="{{ $mainImg }}" alt="{{ $bundling->package_name }}" style="width: 100%; height: 520px; max-height: 540px; object-fit: contain; display: block;" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80';">
             </div>
+
+            <!-- Shortcut Lihat Brosur Resmi Vendor -->
+            @php
+                $posterGallery = $bundling->galleries->first(fn($g) => str_contains($g->image_path, 'posters/'))
+                    ?? $bundling->vendor->galleries->first(fn($g) => str_contains($g->image_path, 'posters/'));
+            @endphp
+            @if($posterGallery)
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 12px;">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('mainGalleryImg').src='{{ $posterGallery->url }}';" style="font-size: 12px; height: 32px; padding: 0 14px; gap: 6px; border-color: var(--rust); color: var(--rust);">
+                        <i data-lucide="file-text" style="width: 14px; height: 14px;"></i>
+                        <span>Lihat Brosur Asli Vendor (Slide Akhir) &rarr;</span>
+                    </button>
+                </div>
+            @endif
 
             <!-- Thumbnail Selector -->
             @if($bundling->vendor->galleries->count() > 1 || $bundling->galleries->count() > 0)
                 <div style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 32px;">
-                    @foreach($bundling->galleries->concat($bundling->vendor->galleries)->take(5) as $gal)
-                        <img src="{{ $gal->url }}" alt="Thumbnail" style="width: 80px; height: 60px; object-fit: cover; border-radius: var(--radius-sm); cursor: pointer; border: 2px solid transparent;" onclick="document.getElementById('mainGalleryImg').src='{{ $gal->url }}'; this.style.borderColor='var(--rust)';" onmouseout="this.style.borderColor='transparent'">
+                    @foreach($bundling->galleries->concat($bundling->vendor->galleries)->take(6) as $gal)
+                        <div style="position: relative; flex-shrink: 0;">
+                            <img src="{{ $gal->url }}" alt="Thumbnail" style="width: 80px; height: 60px; object-fit: cover; border-radius: var(--radius-sm); cursor: pointer; border: 2px solid transparent;" onclick="document.getElementById('mainGalleryImg').src='{{ $gal->url }}'; this.style.borderColor='var(--rust)';" onmouseout="this.style.borderColor='transparent'">
+                            @if(str_contains($gal->image_path, 'posters/'))
+                                <span style="position: absolute; bottom: 3px; left: 3px; right: 3px; background: rgba(0,0,0,0.7); color: #FFF; font-size: 8.5px; padding: 1px 2px; text-align: center; border-radius: 2px; font-weight: 600;">Brosur</span>
+                            @endif
+                        </div>
                     @endforeach
                 </div>
             @endif
@@ -37,19 +56,36 @@
             <!-- Package Description Card -->
             <div class="card-kabut" style="margin-bottom: 28px;">
                 <h2 class="headline-sm" style="margin-bottom: 14px;">Deskripsi & Rincian Fasilitas</h2>
-                <div class="body-md" style="line-height: 1.7; white-space: pre-line; color: var(--body);">
+                <div class="body-md" style="line-height: 1.7; white-space: pre-line; color: var(--body); margin-bottom: 20px;">
                     {{ $bundling->description }}
                 </div>
+
+                @if(!empty($bundling->features) && count($bundling->features) > 0)
+                    <div style="border-top: 1px solid var(--line); padding-top: 18px;">
+                        <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--ink); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                            <i data-lucide="check-circle-2" style="width: 18px; height: 18px; color: #166534;"></i>
+                            <span>Fasilitas & Inklusi Paket Tertera (Brosur Asli Vendor):</span>
+                        </h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px;">
+                            @foreach($bundling->features as $feature)
+                                <div style="display: flex; align-items: flex-start; gap: 10px; background: #F8FAFC; border: 1px solid #E2E8F0; padding: 10px 14px; border-radius: 8px; font-size: 0.88rem; color: #1E293B; line-height: 1.45;">
+                                    <span style="display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: #DCFCE7; color: #166534; font-size: 11px; font-weight: 700; flex-shrink: 0; margin-top: 2px;">✓</span>
+                                    <span>{{ $feature }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
             </div>
 
-            <!-- SPK MARCOS Recommendation Evaluation (Formal Narasi Pelanggan) -->
+            <!-- Rekomendasi & Keunggulan Paket (Formal Narasi Pelanggan) -->
             <div class="card-kabut" style="margin-bottom: 28px; background: var(--paper);">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
                     <div>
                         <span class="caption" style="text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; color: var(--moss); display: block; margin-bottom: 2px;">
-                            Evaluasi Sistem Pendukung Keputusan
+                            Kurasi Kualitas & Keunggulan
                         </span>
-                        <h3 class="headline-sm">Rekomendasi Algoritma MARCOS</h3>
+                        <h3 class="headline-sm">Status Rekomendasi Paket</h3>
                     </div>
                     @if($marcosInfo)
                         @php
@@ -75,15 +111,15 @@
                 </div>
 
                 <p class="body-sm" style="line-height: 1.6; margin-bottom: 16px;">
-                    Paket ini telah dievaluasi melalui 7 kriteria multi-dimensi (kualitas riasan, estetika desain dekorasi, kelengkapan item, kepuasan ulasan, harga paket, lokasi respon, dan kualitas kosmetik).
+                    Paket ini telah dinilai melalui 7 aspek keunggulan metode MARCOS: efisiensi harga, minim biaya tambahan, kelengkapan fasilitas, fleksibilitas layanan, kualitas hasil make-up, keamanan risiko, dan estetika desain dekorasi.
                 </p>
 
-                <!-- Tombol Info (!) untuk Lihat Detail Perhitungan -->
+                <!-- Tombol Info (!) untuk Lihat Detail Kriteria Layanan -->
                 <div style="border-top: 1px solid var(--line); padding-top: 12px; display: flex; justify-content: space-between; align-items: center;">
-                    <span class="caption">Ingin memeriksa transparansi nilai kriteria paket ini?</span>
+                    <span class="caption">Ingin memeriksa penilaian aspek layanan paket ini?</span>
                     <button type="button" class="btn btn-secondary btn-sm" onclick="toggleSpkDetail()" style="display: inline-flex; align-items: center; gap: 6px;">
                         <span style="display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: var(--moss); color: var(--cream); font-size: 11px; font-weight: 700;">!</span>
-                        <span id="txtSpkDetail">Lihat Detail Kriteria</span>
+                        <span id="txtSpkDetail">Lihat Aspek Layanan</span>
                     </button>
                 </div>
 
@@ -94,7 +130,6 @@
                             <div style="background: var(--cream); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px 12px; display: flex; justify-content: space-between; align-items: center;">
                                 <div>
                                     <span style="font-size: 0.82rem; font-weight: 600; color: var(--ink);">{{ $eval->criteria->name }}</span>
-                                    <div class="caption">{{ $eval->criteria->code }} ({{ ucfirst($eval->criteria->type) }})</div>
                                 </div>
                                 <span class="badge badge-moss" style="font-size: 0.78rem;">
                                     Skor {{ $eval->score }}/5
@@ -103,8 +138,8 @@
                         @endforeach
                     </div>
                     @if($marcosInfo)
-                        <div class="caption" style="text-align: right;">
-                            Nilai Utilitas Akhir $f(K_i)$: <strong>{{ number_format($marcosInfo['final_score'], 4) }}</strong>
+                        <div class="caption" style="text-align: right; color: var(--moss); font-weight: 600;">
+                            Tingkat Kesesuaian: Rekomendasi Unggulan
                         </div>
                     @endif
                 </div>
@@ -204,6 +239,23 @@
                             </div>
 
                             <div class="form-group" style="margin-bottom: 14px;">
+                                <label class="form-label" for="event_region">Wilayah / Kecamatan Acara *</label>
+                                <select name="event_region" id="event_region" class="form-select" required onchange="checkDirectOrderProximity(this.value)">
+                                    <option value="">-- Pilih Wilayah Acara --</option>
+                                    <option value="Tanjung Morawa" {{ old('event_region') === 'Tanjung Morawa' ? 'selected' : '' }}>Kec. Tanjung Morawa (Kab. Deli Serdang)</option>
+                                    <option value="Batang Kuis" {{ old('event_region') === 'Batang Kuis' ? 'selected' : '' }}>Kec. Batang Kuis (Kab. Deli Serdang)</option>
+                                    <option value="Lubuk Pakam" {{ old('event_region') === 'Lubuk Pakam' ? 'selected' : '' }}>Kec. Lubuk Pakam (Kab. Deli Serdang)</option>
+                                    <option value="Deli Serdang" {{ old('event_region') === 'Deli Serdang' ? 'selected' : '' }}>Kabupaten Deli Serdang (Umum)</option>
+                                    <option value="Medan" {{ old('event_region') === 'Medan' ? 'selected' : '' }}>Kota Medan</option>
+                                    <option value="Kisaran" {{ old('event_region') === 'Kisaran' ? 'selected' : '' }}>Kota Kisaran (Kab. Asahan)</option>
+                                    <option value="Binjai" {{ old('event_region') === 'Binjai' ? 'selected' : '' }}>Kota Binjai</option>
+                                    <option value="Tebing Tinggi" {{ old('event_region') === 'Tebing Tinggi' ? 'selected' : '' }}>Kota Tebing Tinggi</option>
+                                    <option value="Lainnya" {{ old('event_region') === 'Lainnya' ? 'selected' : '' }}>Wilayah Lainnya / Luar Kota</option>
+                                </select>
+                                <div id="directProxFeedback" style="display: none; font-size: 11px; margin-top: 4px; padding: 4px 8px; border-radius: 4px;"></div>
+                            </div>
+
+                            <div class="form-group" style="margin-bottom: 14px;">
                                 <label class="form-label" for="event_location">Alamat / Lokasi Lengkap Acara *</label>
                                 <textarea name="event_location" id="event_location" class="form-textarea" rows="2" placeholder="Gedung / Rumah, Jalan, RT/RW, Kecamatan..." required>{{ old('event_location') }}</textarea>
                             </div>
@@ -300,6 +352,30 @@
                                 } else {
                                     billEl.textContent = formatRupiah(basePrice);
                                     remEl.textContent = formatRupiah(0);
+                                }
+                            }
+
+                            const directVendorRegion = "{{ $bundling->vendor?->region ?? 'Deli Serdang' }}";
+                            function checkDirectOrderProximity(custRegion) {
+                                const feedback = document.getElementById('directProxFeedback');
+                                if (!feedback) return;
+                                if (!custRegion) {
+                                    feedback.style.display = 'none';
+                                    return;
+                                }
+                                feedback.style.display = 'block';
+                                if (custRegion === directVendorRegion) {
+                                    feedback.style.background = '#DCFCE7';
+                                    feedback.style.color = '#166534';
+                                    feedback.innerHTML = '✨ <strong>Satu Wilayah:</strong> Vendor & venue berada di ' + directVendorRegion + ' (Bebas Biaya Transport Tambahan).';
+                                } else if (directVendorRegion === 'Kisaran' || custRegion === 'Kisaran' || custRegion === 'Lainnya') {
+                                    feedback.style.background = '#FEE2E2';
+                                    feedback.style.color = '#991B1B';
+                                    feedback.innerHTML = '⚠️ <strong>Luar Kota:</strong> Jarak vendor cukup jauh (~135-155 km). Diskusikan transport via chat.';
+                                } else {
+                                    feedback.style.background = '#E0F2FE';
+                                    feedback.style.color = '#0369A1';
+                                    feedback.innerHTML = '📍 <strong>Dekat / Sedang:</strong> Jarak jangkauan vendor efisien (~10-25 km).';
                                 }
                             }
 

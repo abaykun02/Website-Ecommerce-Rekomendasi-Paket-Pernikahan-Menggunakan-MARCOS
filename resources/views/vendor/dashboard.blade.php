@@ -4,29 +4,72 @@
 
 @section('content')
 <div class="container-wide" style="padding-top: 36px; padding-bottom: 64px;">
-    <!-- Vendor Header -->
-    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px;">
-        <div>
-            <span class="badge badge-moss" style="margin-bottom: 6px;">Portal Toko Vendor</span>
-            <h1 class="headline-lg">{{ $vendor->vendor_name }}</h1>
-            <p class="body-sm">Kelola katalog paket, foto galeri portofolio, dan pantau pesanan pelanggan toko Anda.</p>
+    <!-- Vendor Banner Header -->
+    <div style="position: relative; border-radius: 16px; overflow: hidden; margin-bottom: 24px; box-shadow: var(--shadow-subtle); background: #1C1917;">
+        <div style="width: 100%; height: 140px; position: relative;">
+            <img src="{{ $vendor->cover_url }}" alt="Cover {{ $vendor->vendor_name }}" style="width: 100%; height: 100%; object-fit: cover;">
+            <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.7) 100%);"></div>
         </div>
-        <div style="display: flex; gap: 8px;">
-            <a href="{{ route('vendor.bundlings') }}" class="btn btn-primary btn-sm">
-                <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
-                Tambah Paket
-            </a>
-            <a href="{{ route('vendor.profile') }}" class="btn btn-secondary btn-sm">
-                <i data-lucide="settings" style="width: 14px; height: 14px;"></i>
-                Edit Profil
-            </a>
-            <a href="{{ route('vendor.detail', $vendor->id) }}" target="_blank" class="btn btn-secondary btn-sm">
-                <i data-lucide="external-link" style="width: 14px; height: 14px;"></i>
-                Lihat di Web
-            </a>
+        <div style="padding: 0 24px 20px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px; margin-top: -40px; position: relative; z-index: 2;">
+            <div style="display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap;">
+                <a href="{{ route('vendor.profile') }}" title="Ganti Foto Profil Toko" style="position: relative; display: block; flex-shrink: 0;">
+                    <img src="{{ $vendor->avatar_url }}" alt="{{ $vendor->vendor_name }}" style="width: 76px; height: 76px; border-radius: 50%; object-fit: cover; border: 3.5px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.25); background: #FAF5EB;">
+                    <span style="position: absolute; bottom: 0; right: 0; background: var(--color-primary); color: #fff; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1.5px solid #fff;" title="Ubah Foto">
+                        <i data-lucide="camera" style="width: 11px; height: 11px;"></i>
+                    </span>
+                </a>
+                <div style="padding-bottom: 4px;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
+                        <h1 class="headline-lg" style="margin: 0; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">{{ $vendor->vendor_name }}</h1>
+                        <span class="badge badge-moss" style="font-size: 11px; padding: 2px 8px;">Mitra Vendor</span>
+                    </div>
+                    <p class="body-sm" style="margin: 0; color: rgba(255,255,255,0.85); text-shadow: 0 1px 3px rgba(0,0,0,0.6);">
+                        Owner: <strong>{{ $vendor->owner_name }}</strong> &bull; {{ $vendor->location_address }}
+                    </p>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 8px; padding-bottom: 4px;">
+                <a href="{{ route('vendor.bundlings') }}" class="btn btn-primary btn-sm">
+                    <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
+                    Tambah Paket
+                </a>
+                <a href="{{ route('vendor.profile') }}" class="btn btn-secondary btn-sm" style="background: rgba(255,255,255,0.9); border: none;">
+                    <i data-lucide="settings" style="width: 14px; height: 14px;"></i>
+                    Edit Profil & Sampul
+                </a>
+                <a href="{{ route('vendor.detail', $vendor->id) }}" class="btn btn-secondary btn-sm" style="background: rgba(255,255,255,0.9); border: none;">
+                    <i data-lucide="globe" style="width: 14px; height: 14px;"></i>
+                    Lihat Toko
+                </a>
+            </div>
         </div>
     </div>
 
+    @if(!$vendor->hasBankAccount())
+        <div style="background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 12px; padding: 14px 18px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 36px; height: 36px; border-radius: 8px; background: #FEF3C7; color: #D97706; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <i data-lucide="credit-card" style="width: 20px; height: 20px;"></i>
+                </div>
+                <div>
+                    <strong style="color: #92400E; font-size: 14px; display: block;">Rekening Bank Toko Belum Diatur</strong>
+                    <span style="color: #B45309; font-size: 12.5px;">Atur rekening bank toko Anda agar pelanggan dapat langsung mentransfer dana pembayaran pesanan ke rekening Anda.</span>
+                </div>
+            </div>
+            <a href="{{ route('vendor.profile') }}" class="btn btn-sm" style="background: #D97706; color: #FFFFFF; font-weight: 600; padding: 6px 14px; border-radius: 8px; text-decoration: none;">
+                Atur Rekening Sekarang &rarr;
+            </a>
+        </div>
+    @else
+        <div style="background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 10px; padding: 10px 16px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 12.5px; color: #166534; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <i data-lucide="check-circle" style="width: 16px; height: 16px; color: #15803D;"></i>
+                <span>Rekening Penerima Pembayaran: <strong>{{ $vendor->bank_name }} - {{ $vendor->bank_account_number }} (a.n. {{ $vendor->bank_account_name }})</strong></span>
+            </div>
+            <a href="{{ route('vendor.profile') }}" style="color: #15803D; font-weight: 600; text-decoration: underline; font-size: 12px;">Ubah Rekening</a>
+        </div>
+    @endif
 
     <!-- Stats Grid (Minimalist Scale) -->
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 28px;">

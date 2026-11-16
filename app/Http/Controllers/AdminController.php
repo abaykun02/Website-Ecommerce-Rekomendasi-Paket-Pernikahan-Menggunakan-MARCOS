@@ -4,13 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Models\Bundling;
 use App\Models\BundlingEvaluation;
+use App\Models\CartItem;
+use App\Models\ChatConversation;
+use App\Models\ChatMessage;
 use App\Models\Criteria;
+use App\Models\Gallery;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Payment;
+use App\Models\Review;
+use App\Models\ServiceItem;
 use App\Models\User;
 use App\Models\Vendor;
 use App\Services\MarcosService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class AdminController extends Controller
 {
@@ -28,7 +37,9 @@ class AdminController extends Controller
             'total_vendors' => Vendor::count(),
             'total_bundlings' => Bundling::count(),
             'total_orders' => Order::count(),
-            'pending_payments' => Payment::where('payment_status', 'pending_verification')->count(),
+            'pending_orders' => Order::where('status', 'pending')->count(),
+            'pending_payments' => Order::where('status', 'pending')->count(),
+            'pending_vendors' => Vendor::where('status', 'pending')->count(),
             'total_revenue' => Order::whereIn('status', ['paid', 'completed'])->sum('total_price'),
         ];
 
@@ -117,13 +128,37 @@ class AdminController extends Controller
         return back()->with('success', 'Matriks evaluasi kriteria berhasil disimpan & diperbarui!');
     }
 
-    public function orders()
+    public function orders(Request $request)
     {
-        $orders = Order::with(['customer', 'vendor', 'bundling', 'payment'])
-            ->latest()
-            ->paginate(15);
+        $query = Order::with(['customer', 'vendor', 'bundling', 'serviceItem', 'payment', 'items'])
+            ->latest();
 
-        return view('admin.orders', compact('orders'));
+        if ($request->filled('vendor_id')) {
+            $query->where('vendor_id', $request->vendor_id);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('search')) {
+            $s = $request->search;
+            $query->where(function ($q) use ($s) {
+                $q->where('order_code', 'LIKE', "%{$s}%")
+                    ->orWhere('customer_name', 'LIKE', "%{$s}%")
+                    ->orWhere('customer_phone', 'LIKE', "%{$s}%")
+                    ->orWhereHas('customer', function ($cq) use ($s) {
+                        $cq->where('name', 'LIKE', "%{$s}%")
+                            ->orWhere('email', 'LIKE', "%{$s}%")
+                            ->orWhere('phone', 'LIKE', "%{$s}%");
+                    });
+            });
+        }
+
+        $orders = $query->paginate(15)->withQueryString();
+        $vendors = Vendor::orderBy('vendor_name')->get();
+
+        return view('admin.orders', compact('orders', 'vendors'));
     }
 
     public function verifyPayment(Request $request, $paymentId)
@@ -179,7 +214,7 @@ class AdminController extends Controller
             fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
             // Header row
-            $header = ['id_bundling', 'nama_paket', 'vendor', 'harga'];
+            $header = ['id_bundling', 'kode', 'nama_paket', 'vendor', 'harga'];
             foreach ($criterias as $c) {
                 $header[] = $c->code . ' (' . $c->name . ')';
             }
@@ -189,6 +224,7 @@ class AdminController extends Controller
             foreach ($bundlings as $b) {
                 $row = [
                     $b->id,
+                    $b->code ?? '-',
                     $b->package_name,
                     $b->vendor->vendor_name ?? '-',
                     $b->base_price,
@@ -255,17 +291,27 @@ class AdminController extends Controller
 
         // Parse header
         $headerLine = array_shift($lines);
-        // Remove BOM if present
         $headerLine = preg_replace('/^\xEF\xBB\xBF/', '', $headerLine);
         $headers = str_getcsv($headerLine);
 
-        // Map column indices to criteria IDs
+        // Map column indices
         $colToCriteria = [];
-        $idColIndex = 0;
+        $idColIndex = null;
+        $codeColIndex = null;
+        $nameColIndex = null;
+
         foreach ($headers as $idx => $hName) {
             $hClean = trim($hName);
             if (stripos($hClean, 'id_bundling') !== false || stripos($hClean, 'bundling_id') !== false || strtolower($hClean) === 'id') {
                 $idColIndex = $idx;
+                continue;
+            }
+            if (stripos($hClean, 'kode') !== false || strtolower($hClean) === 'code') {
+                $codeColIndex = $idx;
+                continue;
+            }
+            if (stripos($hClean, 'nama_paket') !== false || stripos($hClean, 'package_name') !== false || stripos($hClean, 'paket') !== false) {
+                $nameColIndex = $idx;
                 continue;
             }
             foreach ($criteriaMap as $code => $critId) {
@@ -279,15 +325,18 @@ class AdminController extends Controller
         $updatedCount = 0;
         foreach ($lines as $line) {
             $row = str_getcsv($line);
-            if (empty($row) || !isset($row[$idColIndex])) continue;
+            if (empty($row)) continue;
 
-            $bundlingIdentifier = trim($row[$idColIndex]);
             $bundling = null;
-            if (is_numeric($bundlingIdentifier)) {
-                $bundling = $bundlings->firstWhere('id', (int) $bundlingIdentifier);
+            if ($idColIndex !== null && isset($row[$idColIndex]) && is_numeric(trim($row[$idColIndex]))) {
+                $bundling = $bundlings->firstWhere('id', (int) trim($row[$idColIndex]));
             }
-            if (!$bundling && isset($row[1])) {
-                $bundling = $bundlings->firstWhere('package_name', trim($row[1]));
+            if (!$bundling && $codeColIndex !== null && isset($row[$codeColIndex]) && !empty(trim($row[$codeColIndex]))) {
+                $cCode = strtoupper(trim($row[$codeColIndex]));
+                $bundling = $bundlings->firstWhere('code', $cCode);
+            }
+            if (!$bundling && $nameColIndex !== null && isset($row[$nameColIndex])) {
+                $bundling = $bundlings->firstWhere('package_name', trim($row[$nameColIndex]));
             }
 
             if (!$bundling) continue;
@@ -314,6 +363,12 @@ class AdminController extends Controller
         return back()->with('success', "File Excel berhasil diproses! {$updatedCount} nilai skor evaluasi telah diperbarui dan kalkulasi MARCOS otomatis disinkronkan.");
     }
 
+    public function clearEvaluations()
+    {
+        BundlingEvaluation::query()->delete();
+        return back()->with('success', 'Seluruh data evaluasi skor alternatif berhasil dihapus / di-reset.');
+    }
+
     public function exportMarcosExcel()
     {
         $marcosData = $this->marcosService->calculateRanking();
@@ -334,30 +389,31 @@ class AdminController extends Controller
 
             // Section 1: Ringkasan Ranking
             fputcsv($file, ['HASIL PERANGKINGAN METODE SPK MARCOS']);
-            fputcsv($file, ['Peringkat', 'Nama Paket', 'Vendor', 'Harga', 'Total Terbobot (Si)', 'Utilitas Anti-Ideal (K-)', 'Utilitas Ideal (K+)', 'Skor Akhir Kompromi f(Ki)']);
+            fputcsv($file, ['Peringkat', 'Kode', 'Nama Paket', 'Vendor', 'Harga', 'Total Terbobot (Si)', 'Utilitas Anti-Ideal (K-)', 'Utilitas Ideal (K+)', 'Skor Akhir Kompromi f(Ki)']);
             foreach ($marcosData['rankings'] ?? [] as $r) {
                 fputcsv($file, [
                     $r['rank'],
+                    $r['code'] ?? '-',
                     $r['package_name'],
                     $r['vendor_name'],
                     $r['price'],
-                    round($r['S_i'], 4),
-                    round($r['K_minus'], 4),
-                    round($r['K_plus'], 4),
-                    round($r['final_score'], 5),
+                    round($r['S_i'], 6),
+                    round($r['K_minus'], 6),
+                    round($r['K_plus'], 6),
+                    round($r['final_score'], 6),
                 ]);
             }
 
             fputcsv($file, []);
             fputcsv($file, ['MATRIKS KEPUTUSAN AWAL (X)']);
-            $xHeader = ['Alternatif', 'Vendor'];
+            $xHeader = ['Kode', 'Alternatif', 'Vendor'];
             foreach ($criterias as $c) {
                 $xHeader[] = $c->code . ' (' . $c->type . ')';
             }
             fputcsv($file, $xHeader);
 
             foreach ($marcosData['bundlings'] ?? [] as $b) {
-                $xRow = [$b->package_name, $b->vendor->vendor_name ?? '-'];
+                $xRow = [$b->code ?? '-', $b->package_name, $b->vendor->vendor_name ?? '-'];
                 foreach ($criterias as $c) {
                     $xRow[] = $marcosData['matrix'][$b->id][$c->id] ?? 0;
                 }
@@ -365,8 +421,8 @@ class AdminController extends Controller
             }
 
             // Ideal Solutions
-            $aiRow = ['Solusi Ideal (A+)', 'MAX/MIN'];
-            $aaiRow = ['Solusi Anti-Ideal (A-)', 'MIN/MAX'];
+            $aiRow = ['-', 'Solusi Ideal (A+)', 'MAX/MIN'];
+            $aaiRow = ['-', 'Solusi Anti-Ideal (A-)', 'MIN/MAX'];
             foreach ($criterias as $c) {
                 $aiRow[] = $marcosData['ideal'][$c->id] ?? 0;
                 $aaiRow[] = $marcosData['anti_ideal'][$c->id] ?? 0;
@@ -476,24 +532,41 @@ class AdminController extends Controller
 
     public function deleteUser($id)
     {
-        $user = User::findOrFail($id);
+        $user = User::with('vendor')->findOrFail($id);
         if ($user->id === auth()->id()) {
             return back()->with('error', 'Anda tidak dapat menghapus akun sendiri yang sedang aktif digunakan!');
         }
 
         $name = $user->name;
-        $user->delete();
 
-        return back()->with('success', "Akun pengguna {$name} berhasil dihapus permanen dari sistem!");
+        if ($user->isVendor() || $user->vendor) {
+            $vendor = $user->vendor ?? Vendor::where('user_id', $user->id)->first();
+            if ($vendor) {
+                $this->purgeVendorData($vendor);
+            } else {
+                $this->purgeCustomerData($user);
+            }
+        } elseif ($user->isCustomer()) {
+            $this->purgeCustomerData($user);
+        } else {
+            // Admin lain (jika ada akun admin kedua)
+            $user->delete();
+        }
+
+        return back()->with('success', "Akun pengguna \"{$name}\" beserta seluruh data terkait berhasil dihapus permanen dari database.");
     }
 
     /**
-     * Vendor Management: List all vendors
+     * Vendor Management: List all vendors with status filter
      */
     public function vendors(Request $request)
     {
         $query = Vendor::with('user')
             ->withCount(['bundlings', 'serviceItems', 'orders', 'reviews']);
+
+        if ($request->filled('status') && in_array($request->status, ['pending', 'approved', 'rejected'])) {
+            $query->where('status', $request->status);
+        }
 
         if ($request->filled('search')) {
             $s = $request->search;
@@ -507,7 +580,52 @@ class AdminController extends Controller
 
         $vendors = $query->latest()->paginate(12)->withQueryString();
 
-        return view('admin.vendors', compact('vendors'));
+        $pendingCount = Vendor::where('status', 'pending')->count();
+        $approvedCount = Vendor::where('status', 'approved')->count();
+        $rejectedCount = Vendor::where('status', 'rejected')->count();
+        $totalCount = Vendor::count();
+
+        return view('admin.vendors', compact('vendors', 'pendingCount', 'approvedCount', 'rejectedCount', 'totalCount'));
+    }
+
+    /**
+     * Verifikasi & Setujui Akun Vendor yang Mendaftar
+     */
+    public function approveVendor($id)
+    {
+        $vendor = Vendor::with('user')->findOrFail($id);
+        $vendor->update([
+            'status' => 'approved',
+            'verified_at' => now(),
+            'rejection_reason' => null,
+        ]);
+
+        if ($vendor->user) {
+            $vendor->user->update(['is_active' => true]);
+        }
+
+        return back()->with('success', "Mitra vendor \"{$vendor->vendor_name}\" berhasil diverifikasi dan disetujui! Vendor sekarang dapat masuk ke akunnya.");
+    }
+
+    /**
+     * Tolak Pendaftaran Akun Vendor
+     */
+    public function rejectVendor(Request $request, $id)
+    {
+        $vendor = Vendor::with('user')->findOrFail($id);
+        $reason = $request->input('rejection_reason');
+
+        $vendor->update([
+            'status' => 'rejected',
+            'verified_at' => now(),
+            'rejection_reason' => $reason,
+        ]);
+
+        if ($vendor->user) {
+            $vendor->user->update(['is_active' => false]);
+        }
+
+        return back()->with('success', "Pendaftaran mitra vendor \"{$vendor->vendor_name}\" telah ditolak.");
     }
 
     /**
@@ -532,14 +650,162 @@ class AdminController extends Controller
     }
 
     /**
-     * Vendor Management: Delete vendor
+     * Vendor Management: Delete vendor beserta seluruh data & akun user login-nya
      */
     public function deleteVendor($id)
     {
-        $vendor = Vendor::findOrFail($id);
+        $vendor = Vendor::with('user')->findOrFail($id);
         $name = $vendor->vendor_name;
-        $vendor->delete();
 
-        return back()->with('success', "Data mitra vendor {$name} berhasil dihapus.");
+        $this->purgeVendorData($vendor);
+
+        return back()->with('success', "Akun mitra vendor \"{$name}\" beserta seluruh data dan akun pengguna terkait berhasil dihapus permanen dari database.");
+    }
+
+    /**
+     * Hapus bersih seluruh data vendor beserta akun user login-nya dari database
+     */
+    private function purgeVendorData(Vendor $vendor): void
+    {
+        DB::transaction(function () use ($vendor) {
+            $user = $vendor->user;
+            $bundlingIds = $vendor->bundlings()->pluck('id')->toArray();
+            $serviceItemIds = $vendor->serviceItems()->pluck('id')->toArray();
+
+            // 1. Kumpulkan file gambar galeri untuk dihapus dari storage fisik
+            $galleries = Gallery::where('vendor_id', $vendor->id)
+                ->orWhereIn('bundling_id', $bundlingIds)
+                ->get();
+
+            foreach ($galleries as $gallery) {
+                if ($gallery->image_path && Storage::disk('public')->exists($gallery->image_path)) {
+                    Storage::disk('public')->delete($gallery->image_path);
+                }
+            }
+            // Hapus record galleries
+            Gallery::where('vendor_id', $vendor->id)
+                ->orWhereIn('bundling_id', $bundlingIds)
+                ->delete();
+
+            // 2. Hapus evaluasi skor alternatif SPK MARCOS
+            BundlingEvaluation::whereIn('bundling_id', $bundlingIds)->delete();
+
+            // 3. Hapus cart items terkait vendor / bundling / service item
+            CartItem::where('vendor_id', $vendor->id)
+                ->orWhereIn('bundling_id', $bundlingIds)
+                ->orWhereIn('service_item_id', $serviceItemIds)
+                ->delete();
+
+            // 4. Kumpulkan ID orders yang terkait langsung dengan vendor ini atau item-itemnya
+            $vendorOrderIds = Order::where('vendor_id', $vendor->id)->pluck('id')->toArray();
+            $relatedOrderIds = OrderItem::where('vendor_id', $vendor->id)
+                ->orWhereIn('bundling_id', $bundlingIds)
+                ->orWhereIn('service_item_id', $serviceItemIds)
+                ->pluck('order_id')
+                ->toArray();
+
+            $allOrderIds = array_unique(array_merge($vendorOrderIds, $relatedOrderIds));
+
+            if (!empty($allOrderIds)) {
+                // Hapus bukti transfer fisik dari payments
+                $payments = Payment::whereIn('order_id', $allOrderIds)->get();
+                foreach ($payments as $payment) {
+                    if ($payment->proof_image && Storage::disk('public')->exists($payment->proof_image)) {
+                        Storage::disk('public')->delete($payment->proof_image);
+                    }
+                }
+                Payment::whereIn('order_id', $allOrderIds)->delete();
+
+                // Hapus reviews pada order-order ini
+                Review::whereIn('order_id', $allOrderIds)->delete();
+
+                // Hapus order items
+                OrderItem::whereIn('order_id', $allOrderIds)->delete();
+
+                // Hapus orders
+                Order::whereIn('id', $allOrderIds)->delete();
+            }
+
+            // Hapus sisa review ke vendor ini jika ada
+            Review::where('vendor_id', $vendor->id)->delete();
+
+            // Hapus sisa order items terkait vendor
+            OrderItem::where('vendor_id', $vendor->id)
+                ->orWhereIn('bundling_id', $bundlingIds)
+                ->orWhereIn('service_item_id', $serviceItemIds)
+                ->delete();
+
+            // 5. Hapus chat conversations & messages
+            $conversationIds = ChatConversation::where('vendor_id', $vendor->id)->pluck('id')->toArray();
+            if (!empty($conversationIds)) {
+                ChatMessage::whereIn('conversation_id', $conversationIds)->delete();
+                ChatConversation::whereIn('id', $conversationIds)->delete();
+            }
+
+            // Jika user vendor pernah kirim pesan di percakapan lain
+            if ($user) {
+                ChatMessage::where('sender_id', $user->id)->delete();
+            }
+
+            // 6. Hapus katalog layanan terpisah dan paket bundling vendor
+            $vendor->serviceItems()->delete();
+            $vendor->bundlings()->delete();
+
+            // 7. Hapus data record vendor
+            $vendor->delete();
+
+            // 8. Hapus akun user login vendor di tabel users (jika bukan akun admin yang login)
+            if ($user && $user->id !== auth()->id()) {
+                CartItem::where('user_id', $user->id)->delete();
+                $user->delete();
+            }
+        });
+    }
+
+    /**
+     * Hapus bersih seluruh data pelanggan (customer) beserta akun login-nya dari database
+     */
+    private function purgeCustomerData(User $user): void
+    {
+        DB::transaction(function () use ($user) {
+            // 1. Hapus isi keranjang belanja customer
+            CartItem::where('user_id', $user->id)->delete();
+
+            // 2. Hapus riwayat chat pesan & percakapan customer
+            ChatMessage::where('sender_id', $user->id)->delete();
+            $convIds = ChatConversation::where('customer_id', $user->id)->pluck('id')->toArray();
+            if (!empty($convIds)) {
+                ChatMessage::whereIn('conversation_id', $convIds)->delete();
+                ChatConversation::whereIn('id', $convIds)->delete();
+            }
+
+            // 3. Hapus ulasan/review yang pernah ditulis customer
+            Review::where('customer_id', $user->id)->delete();
+
+            // 4. Kumpulkan seluruh pesanan milik customer
+            $customerOrderIds = Order::where('customer_id', $user->id)->pluck('id')->toArray();
+            if (!empty($customerOrderIds)) {
+                // Hapus bukti bayar fisik
+                $payments = Payment::whereIn('order_id', $customerOrderIds)->get();
+                foreach ($payments as $payment) {
+                    if ($payment->proof_image && Storage::disk('public')->exists($payment->proof_image)) {
+                        Storage::disk('public')->delete($payment->proof_image);
+                    }
+                }
+                Payment::whereIn('order_id', $customerOrderIds)->delete();
+
+                // Hapus review terkait order customer
+                Review::whereIn('order_id', $customerOrderIds)->delete();
+
+                // Hapus order items
+                OrderItem::whereIn('order_id', $customerOrderIds)->delete();
+
+                // Hapus order
+                Order::whereIn('id', $customerOrderIds)->delete();
+            }
+
+            // 5. Hapus record user customer dari database
+            $user->delete();
+        });
     }
 }

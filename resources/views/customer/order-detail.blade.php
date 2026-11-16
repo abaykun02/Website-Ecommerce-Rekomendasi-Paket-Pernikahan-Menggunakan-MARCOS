@@ -120,11 +120,30 @@
             </div>
 
             <div style="grid-column: span 2;">
-                <div class="caption" style="margin-bottom: 4px;">Lokasi / Alamat Lengkap Acara</div>
-                <div class="body-md" style="font-weight: 600;">
-                    <i data-lucide="map-pin" style="width: 14px; height: 14px; vertical-align: middle;"></i>
-                    {{ $order->event_location }}
+                <div class="caption" style="margin-bottom: 4px;">Wilayah & Alamat Lengkap Acara</div>
+                <div class="body-md" style="font-weight: 600; margin-bottom: 6px;">
+                    <i data-lucide="map-pin" style="width: 14px; height: 14px; vertical-align: middle; color: #C5A059;"></i>
+                    @if($order->event_region)
+                        <span class="badge" style="background: #F1F5F9; color: #1E293B; border: 1px solid #CBD5E1; margin-right: 6px; font-weight: 700;">
+                            📍 {{ $order->event_region }}
+                        </span>
+                    @endif
+                    <span>{{ $order->event_location }}</span>
                 </div>
+
+                @php
+                    $prox = $order->proximity;
+                @endphp
+                @if($prox)
+                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 6px; padding: 8px 12px; border-radius: 8px; background: {{ $prox['badge_bg'] }}; border: 1px solid {{ $prox['badge_border'] }};">
+                        <span class="badge" style="background: {{ $prox['badge_color'] }}; color: #FFFFFF; font-size: 11px; font-weight: 700;">
+                            {{ $prox['label'] }} ({{ $prox['distance_km'] }})
+                        </span>
+                        <span style="font-size: 12px; color: {{ $prox['badge_color'] }}; font-weight: 500;">
+                            {{ $prox['description'] }}
+                        </span>
+                    </div>
+                @endif
             </div>
 
             @if($order->notes)
@@ -151,96 +170,208 @@
             @endif
         </div>
 
-        <!-- 1. Midtrans Snap Online Payment Option -->
-        @if(in_array($order->status, ['pending', 'approved']))
-            <div style="background: linear-gradient(135deg, #0D0C22 0%, #1F1D36 100%); color: white; border-radius: 14px; padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow-hover);">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; margin-bottom: 18px;">
+        <!-- SECTION PEMBAYARAN: ALUR UTAMA TRANSFER MANUAL & OPSIONAL PAYMENT GATEWAY MIDTRANS -->
+        @if(!$order->payment || $order->payment->payment_status === 'rejected')
+            @php
+                $targetVendor = $order->vendor ?? $order->bundling?->vendor ?? $order->serviceItem?->vendor ?? $order->items->first()?->vendor;
+            @endphp
+            <div style="background: #FFFFFF; border-radius: 14px; border: 1px solid var(--color-border); padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow-subtle);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 18px; flex-wrap: wrap;">
                     <div>
-                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-                            <span class="badge badge-accent" style="font-size: 11px;">Payment Gateway Resmi</span>
-                            <span class="badge badge-outline" style="border-color: rgba(255,255,255,0.4); color: white; font-size: 10px;">Sandbox</span>
-                        </div>
-                        <h3 style="font-size: 20px; font-weight: 800; color: white; margin-bottom: 4px;">Midtrans Snap Pop-Up Payment</h3>
-                        <p style="font-size: 13px; color: rgba(255, 255, 255, 0.75); max-width: 520px; line-height: 1.5;">
-                            Bayar instan via GoPay, QRIS, BCA/Mandiri/BRI Virtual Account, ShopeePay, atau Kartu Kredit. Status pesanan akan terverifikasi otomatis dalam hitungan detik.
+                        <div class="caption" style="color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Instruksi Pembayaran Pesanan</div>
+                        <h3 style="font-size: 18px; font-weight: 700; color: #1E293B; margin: 4px 0;">
+                            Transfer Bank & Konfirmasi Bukti Pembayaran
+                        </h3>
+                        <p style="font-size: 13px; color: var(--muted); margin: 0;">
+                            @if($targetVendor && $targetVendor->hasBankAccount())
+                                Silakan lakukan transfer tagihan langsung ke rekening bank resmi mitra vendor <strong>{{ $targetVendor->vendor_name }}</strong> di bawah ini.
+                            @else
+                                Silakan lakukan transfer sesuai jumlah tagihan ke rekening bank resmi di bawah ini.
+                            @endif
                         </p>
                     </div>
 
-                    <div style="text-align: right;">
-                        <div style="font-size: 12px; color: rgba(255,255,255,0.7);">Jumlah Tagihan:</div>
-                        <div style="font-size: 24px; font-weight: 800; color: var(--color-accent);">
+                    <div style="text-align: right; background: #FAF8F5; padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(197, 160, 89, 0.3);">
+                        <div style="font-size: 11.5px; color: var(--muted);">Total Tagihan Saat Ini:</div>
+                        <div style="font-size: 20px; font-weight: 800; color: var(--primary);">
                             Rp {{ number_format($order->payable_amount, 0, ',', '.') }}
                         </div>
-                        <div style="font-size: 11px; color: rgba(255,255,255,0.6);">
+                        <div style="font-size: 11px; color: #64748B;">
                             ({{ $order->payment_type === 'dp' ? 'DP ' . ($order->dp_percentage ?? 30) . '%' : 'Pelunasan Penuh' }})
                         </div>
                     </div>
                 </div>
 
-                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                    <button type="button" id="payButtonMidtrans" class="btn btn-primary" style="height: 48px; padding: 0 28px; font-size: 15px; font-weight: 700; background: var(--color-accent); color: var(--color-primary); border: none;">
-                        <i data-lucide="zap" style="width: 18px; height: 18px;"></i>
-                        Bayar Sekarang via Midtrans
-                    </button>
+                @if($targetVendor && $targetVendor->hasBankAccount())
+                    <!-- Nomor Rekening Resmi Vendor (Terhubung Langsung) -->
+                    <div style="background: linear-gradient(135deg, #FAF8F5 0%, #FFFFFF 100%); border-radius: 12px; border: 1.5px solid rgba(197, 160, 89, 0.4); padding: 18px 20px; margin-bottom: 22px; box-shadow: 0 4px 12px rgba(142,60,0,0.04);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span class="badge badge-moss" style="display: inline-flex; align-items: center; gap: 4px;">
+                                    <i data-lucide="store" style="width: 12px; height: 12px;"></i>
+                                    Rekening Resmi Mitra Vendor
+                                </span>
+                                <strong style="color: #1E293B; font-size: 14.5px;">{{ $targetVendor->vendor_name }}</strong>
+                            </div>
+                            <span class="caption" style="color: #64748B;">Pemilik: {{ $targetVendor->owner_name }}</span>
+                        </div>
 
-                    <div style="font-size: 12px; color: rgba(255, 255, 255, 0.65); display: flex; align-items: center; gap: 6px;">
-                        <i data-lucide="shield-check" style="width: 14px; height: 14px; color: #4ADE80;"></i>
-                        Tersertifikasi PCI DSS & 3D Secure
+                        <div style="display: flex; justify-content: space-between; align-items: center; background: #FFFFFF; padding: 14px 18px; border-radius: 10px; border: 1px solid #E2E8F0; flex-wrap: wrap; gap: 14px;">
+                            <div style="display: flex; align-items: center; gap: 14px;">
+                                <div style="width: 44px; height: 44px; border-radius: 8px; background: rgba(142,60,0,0.08); display: flex; align-items: center; justify-content: center; color: var(--primary); flex-shrink: 0;">
+                                    <i data-lucide="building-2" style="width: 22px; height: 22px;"></i>
+                                </div>
+                                <div>
+                                    <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); font-weight: 600;">Bank Penerima</div>
+                                    <div style="font-size: 16.5px; font-weight: 800; color: var(--primary);">
+                                        {{ $targetVendor->bank_name }}
+                                    </div>
+                                    <div style="font-size: 12.5px; color: #475569; margin-top: 2px;">
+                                        a.n. <strong style="color: #1E293B;">{{ $targetVendor->bank_account_name }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; align-items: center; gap: 10px; background: #F8FAFC; padding: 8px 14px; border-radius: 8px; border: 1px dashed #CBD5E1;">
+                                <div>
+                                    <div style="font-size: 10.5px; color: var(--muted);">Nomor Rekening Vendor:</div>
+                                    <div id="vendorAccountNo" style="font-size: 18px; font-weight: 800; color: #0F172A; font-family: monospace; letter-spacing: 0.5px;">
+                                        {{ $targetVendor->bank_account_number }}
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-secondary" onclick="copyVendorAccount()" title="Salin Nomor Rekening" style="height: 32px; padding: 0 10px; font-size: 11px; display: inline-flex; align-items: center; gap: 4px;">
+                                    <i data-lucide="copy" style="width: 12px; height: 12px;"></i>
+                                    <span id="copyBtnText">Salin</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        @if(!empty($targetVendor->bank_notes))
+                            <div style="margin-top: 10px; font-size: 12px; color: #64748B; display: flex; align-items: center; gap: 6px;">
+                                <i data-lucide="info" style="width: 14px; height: 14px; color: var(--primary); flex-shrink: 0;"></i>
+                                <span><strong>Catatan dari Vendor:</strong> {{ $targetVendor->bank_notes }}</span>
+                            </div>
+                        @endif
                     </div>
-                </div>
-            </div>
+                @else
+                    <!-- Nomor Rekening Marketplace (Fallback jika vendor belum atur rekening) -->
+                    <div style="margin-bottom: 12px; font-size: 12px; color: #B45309; background: #FFFBEB; padding: 8px 12px; border-radius: 8px; border: 1px solid #FDE68A;">
+                        <i data-lucide="info" style="width: 13px; height: 13px; display: inline-block; vertical-align: middle;"></i>
+                        Mitra vendor belum mengatur rekening khusus. Anda dapat melakukan pembayaran melalui rekening penampung resmi platform berikut:
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 20px;">
+                        <div style="padding: 12px 16px; border-radius: 10px; background: #F8FAFC; border: 1px solid #E2E8F0;">
+                            <span class="badge badge-accent" style="font-size: 10px; margin-bottom: 4px;">Bank BCA</span>
+                            <div style="font-size: 16px; font-weight: 800; color: #1E293B; font-family: monospace;">828-123-4567</div>
+                            <div style="font-size: 11.5px; color: #64748B;">a.n. PT Glow & Grace Wedding</div>
+                        </div>
+                        <div style="padding: 12px 16px; border-radius: 10px; background: #F8FAFC; border: 1px solid #E2E8F0;">
+                            <span class="badge badge-accent" style="font-size: 10px; margin-bottom: 4px;">Bank Mandiri</span>
+                            <div style="font-size: 16px; font-weight: 800; color: #1E293B; font-family: monospace;">105-00-987654</div>
+                            <div style="font-size: 11.5px; color: #64748B;">a.n. PT Glow & Grace Wedding</div>
+                        </div>
+                        <div style="padding: 12px 16px; border-radius: 10px; background: #F8FAFC; border: 1px solid #E2E8F0;">
+                            <span class="badge badge-accent" style="font-size: 10px; margin-bottom: 4px;">Bank BSI (Syariah)</span>
+                            <div style="font-size: 16px; font-weight: 800; color: #1E293B; font-family: monospace;">714-555-8899</div>
+                            <div style="font-size: 11.5px; color: #64748B;">a.n. PT Glow & Grace Wedding</div>
+                        </div>
+                    </div>
+                @endif
 
-            <!-- Midtrans Snap Script Handler -->
-            <script type="text/javascript">
-                document.getElementById('payButtonMidtrans').onclick = function () {
-                    const snapToken = "{{ $order->snap_token }}";
+                <!-- Form Upload Bukti Transfer -->
+                <form action="{{ route('customer.order.payment', $order->id) }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="grid-cols-2" style="gap: 14px; margin-bottom: 14px;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label" for="bank_name">Bank Pengirim *</label>
+                            <input type="text" name="bank_name" id="bank_name" class="input-pill" placeholder="Contoh: BCA / Mandiri / BRI / BSI" required>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label" for="account_name">Nama Pemilik Rekening Pengirim *</label>
+                            <input type="text" name="account_name" id="account_name" class="input-pill" placeholder="Sesuai nama di rekening/struk" required>
+                        </div>
+                    </div>
 
-                    if (!snapToken) {
-                        // Fetch token dynamically if missing
-                        fetch("{{ route('midtrans.snap-token', $order->id) }}")
-                            .then(res => res.json())
-                            .then(data => {
-                                if (data.snap_token) {
-                                    triggerSnap(data.snap_token);
-                                } else {
-                                    alert('Gagal memuat snap token Midtrans. Silakan coba sesaat lagi.');
+                    <div class="form-group" style="margin-bottom: 18px;">
+                        <label class="form-label" for="proof_image">Unggah Bukti Struk / Tangkapan Layar Transfer *</label>
+                        <input type="file" name="proof_image" id="proof_image" class="input-pill" accept="image/*" required style="padding-top: 10px;">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%; height: 46px; font-weight: 700;">
+                        <i data-lucide="upload-cloud" style="width: 16px; height: 16px;"></i>
+                        Unggah Bukti Pembayaran
+                    </button>
+                </form>
+
+                <!-- Opsi Pembayaran Otomatis Midtrans (Tersimpan Siap Digunakan / Untuk Uji Dosen) -->
+                @if(in_array($order->status, ['pending', 'approved']))
+                    <div style="margin-top: 20px; padding-top: 18px; border-top: 1px dashed #E2E8F0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; background: #F8FAFC; border: 1px solid #E2E8F0; padding: 14px 18px; border-radius: 10px;">
+                            <div>
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <span class="badge badge-outline" style="font-size: 10px; border-color: #94A3B8; color: #475569;">Opsi Gateway</span>
+                                    <strong style="font-size: 13px; color: #1E293B;">Pembayaran Otomatis via Midtrans (Snap Pop-Up)</strong>
+                                </div>
+                                <div style="font-size: 11.5px; color: #64748B; margin-top: 2px;">
+                                    Tersedia untuk demonstrasi pembayaran instan otomatis (GoPay, QRIS, Virtual Account, Kartu Kredit).
+                                </div>
+                            </div>
+                            <button type="button" id="payButtonMidtrans" class="btn btn-secondary btn-sm" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 600;">
+                                <i data-lucide="credit-card" style="width: 14px; height: 14px;"></i>
+                                Buka Pop-Up Midtrans
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Midtrans Snap Script Handler -->
+                    <script type="text/javascript">
+                        document.getElementById('payButtonMidtrans')?.addEventListener('click', function () {
+                            const snapToken = "{{ $order->snap_token }}";
+
+                            if (!snapToken) {
+                                fetch("{{ route('midtrans.snap-token', $order->id) }}")
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        if (data.snap_token) {
+                                            triggerSnap(data.snap_token);
+                                        } else {
+                                            alert('Gagal memuat snap token Midtrans. Silakan coba kembali.');
+                                        }
+                                    })
+                                    .catch(err => {
+                                        console.error(err);
+                                        alert('Koneksi Midtrans belum tersedia. Anda dapat menggunakan transfer manual di atas.');
+                                    });
+                            } else {
+                                triggerSnap(snapToken);
+                            }
+                        });
+
+                        function triggerSnap(token) {
+                            if (typeof snap === 'undefined') {
+                                alert('Midtrans Snap SDK sedang dimuat. Silakan coba 2 detik lagi.');
+                                return;
+                            }
+
+                            snap.pay(token, {
+                                onSuccess: function (result) {
+                                    window.location.reload();
+                                },
+                                onPending: function (result) {
+                                    window.location.reload();
+                                },
+                                onError: function (result) {
+                                    alert('Pembayaran Midtrans tidak selesai. Silakan gunakan metode transfer manual.');
+                                    window.location.reload();
+                                },
+                                onClose: function () {
+                                    console.log('Snap pop-up ditutup.');
                                 }
-                            })
-                            .catch(err => {
-                                console.error(err);
-                                alert('Koneksi pembayaran gagal. Silakan coba kembali.');
                             });
-                    } else {
-                        triggerSnap(snapToken);
-                    }
-                };
-
-                function triggerSnap(token) {
-                    if (typeof snap === 'undefined') {
-                        alert('Midtrans Snap SDK sedang dimuat. Silakan tunggu 2 detik dan klik lagi.');
-                        return;
-                    }
-
-                    snap.pay(token, {
-                        onSuccess: function (result) {
-                            console.log('Midtrans Payment Success:', result);
-                            window.location.reload();
-                        },
-                        onPending: function (result) {
-                            console.log('Midtrans Payment Pending:', result);
-                            window.location.reload();
-                        },
-                        onError: function (result) {
-                            console.error('Midtrans Payment Error:', result);
-                            alert('Pembayaran gagal atau dibatalkan.');
-                            window.location.reload();
-                        },
-                        onClose: function () {
-                            console.log('Snap modal closed by customer.');
                         }
-                    });
-                }
-            </script>
+                    </script>
+                @endif
+            </div>
         @endif
 
         @if($order->payment)
@@ -280,45 +411,7 @@
             </div>
         @endif
 
-        <!-- 2. Manual Bank Transfer Option (Fallback) -->
-        @if(!$order->payment || $order->payment->payment_status === 'rejected')
-            <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--color-border);">
-                <div class="label-md" style="margin-bottom: 8px; color: var(--color-secondary);">
-                    Atau Pembayaran Transfer Bank Manual (Konfirmasi Bukti Transfer)
-                </div>
-                <div class="alert alert-success" style="border-radius: 10px; margin-bottom: 20px;">
-                    <i data-lucide="info" style="width: 18px; height: 18px;"></i>
-                    <div>
-                        Silakan transfer total pembayaran ke rekening resmi marketplace:<br>
-                        <strong>BCA 828-123-4567 a.n. Glow & Grace</strong> atau <strong>Mandiri 105-00-987654 a.n. Glow & Grace</strong>
-                    </div>
-                </div>
 
-                <form action="{{ route('customer.order.payment', $order->id) }}" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    <div class="grid-cols-2" style="gap: 16px;">
-                        <div class="form-group">
-                            <label class="form-label" for="bank_name">Bank Pengirim *</label>
-                            <input type="text" name="bank_name" id="bank_name" class="input-pill" placeholder="Contoh: BCA / Mandiri / BRI / BSI" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" for="account_name">Nama Pemilik Rekening Pengirim *</label>
-                            <input type="text" name="account_name" id="account_name" class="input-pill" placeholder="Sesuai nama di buku tabungan/struk" required>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="proof_image">Unggah Bukti Struk / Screenshot Transfer *</label>
-                        <input type="file" name="proof_image" id="proof_image" class="input-pill" accept="image/*" required style="padding-top: 12px;">
-                    </div>
-
-                    <button type="submit" class="btn btn-secondary" style="width: 100%; height: 48px;">
-                        <i data-lucide="upload" style="width: 16px; height: 16px;"></i>
-                        Unggah Bukti Transfer Manual
-                    </button>
-                </form>
-            </div>
-        @endif
     </div>
 
     <!-- Section Ulasan Pelanggan (Ketika Order Selesai) -->
@@ -363,4 +456,26 @@
         </div>
     @endif
 </div>
+
+<script>
+    function copyVendorAccount() {
+        const el = document.getElementById('vendorAccountNo');
+        if (!el) return;
+        const text = el.innerText.trim();
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(function() {
+                const btnText = document.getElementById('copyBtnText');
+                if (btnText) {
+                    const orig = btnText.innerText;
+                    btnText.innerText = 'Tersalin!';
+                    setTimeout(() => { btnText.innerText = orig; }, 2000);
+                }
+            }).catch(function() {
+                alert('Nomor rekening disalin: ' + text);
+            });
+        } else {
+            alert('Nomor rekening: ' + text);
+        }
+    }
+</script>
 @endsection

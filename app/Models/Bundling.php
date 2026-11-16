@@ -12,10 +12,13 @@ class Bundling extends Model
     use HasFactory;
 
     protected $fillable = [
+        'code',
         'vendor_id',
         'package_name',
         'description',
+        'features',
         'base_price',
+        'extra_fee',
         'is_active',
     ];
 
@@ -23,6 +26,8 @@ class Bundling extends Model
     {
         return [
             'base_price' => 'decimal:2',
+            'extra_fee' => 'decimal:2',
+            'features' => 'array',
             'is_active' => 'boolean',
         ];
     }

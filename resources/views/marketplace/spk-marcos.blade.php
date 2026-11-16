@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Hasil Rekomendasi SPK Metode MARCOS - Glow & Grace')
+@section('title', 'Hasil Rekomendasi Paket Pernikahan - Glow & Grace')
 
 @section('content')
 @php
@@ -10,12 +10,12 @@
 <div class="container-wide" style="padding-top: 48px; padding-bottom: 72px;">
     <!-- Editorial Header (Gaya Kabut) -->
     <div style="margin-bottom: 36px; max-width: 820px;">
-        <span class="badge badge-moss" style="margin-bottom: 10px;">Sistem Pendukung Keputusan</span>
+        <span class="badge badge-moss" style="margin-bottom: 10px;">Rekomendasi Paket</span>
         <h1 class="headline-lg" style="margin-bottom: 12px; font-weight: 500;">
-            Hasil Pemeringkatan Rekomendasi Paket Pernikahan
+            Hasil Rekomendasi Paket Pernikahan Terbaik
         </h1>
         <p class="body-md" style="line-height: 1.65; color: var(--body);">
-            Rekomendasi paket rias pengantin dan dekorasi pelaminan dianalisis menggunakan metode <strong>MARCOS</strong> (<em>Measurement of Alternatives and Ranking according to COmpromise Solution</em>) untuk menghasilkan urutan prioritas yang objektif dan terukur.
+            Rekomendasi paket rias pengantin dan dekorasi pelaminan disesuaikan secara objektif berdasarkan kebutuhan, jarak lokasi acara, dan preferensi anggaran pernikahan Anda.
         </p>
     </div>
 
@@ -35,7 +35,7 @@
                         </span>
                     </div>
                     <p class="caption" style="margin: 0; color: #64748B; font-size: 12px;">
-                        Tentukan faktor terpenting bagi rencana pernikahan Anda. Sistem MARCOS akan mengalokasikan pembobotan preferensi secara proporsional.
+                        Tentukan faktor yang paling Anda utamakan untuk mendapatkan urutan rekomendasi paket terbaik.
                     </p>
                 </div>
                 <div style="display: flex; align-items: center; gap: 10px;">
@@ -43,13 +43,13 @@
                         <span class="badge badge-success" style="font-size: 11.5px; padding: 6px 12px;">
                             {{ count($preferences) }} Prioritas Aktif
                         </span>
-                        <a href="{{ route('spk.rekomendasi') }}" class="btn btn-secondary btn-sm" style="height: 36px; padding: 0 14px; font-size: 12px;" title="Reset ke pembobotan default">
+                        <a href="{{ route('spk.rekomendasi') }}" class="btn btn-secondary btn-sm" style="height: 36px; padding: 0 14px; font-size: 12px;" title="Reset ke preferensi default">
                             <i data-lucide="rotate-ccw" style="width: 13px; height: 13px;"></i>
                             <span>Reset</span>
                         </a>
                     @else
                         <span class="badge" style="background: #F8FAFC; color: #64748B; border: 1px solid #E2E8F0; font-size: 11.5px; padding: 6px 12px;">
-                            Bobot Standar SPK
+                            Preferensi Standar
                         </span>
                     @endif
                     <button type="submit" class="btn btn-primary btn-sm" style="height: 36px; padding: 0 18px; font-size: 12.5px; font-weight: 600;">
@@ -59,52 +59,96 @@
                 </div>
             </div>
 
+            <!-- Wilayah / Lokasi Acara Filter -->
+            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                    <div style="display: flex; align-items: center; gap: 10px; min-width: 260px;">
+                        <div style="width: 34px; height: 34px; border-radius: 8px; background: #FFFBEB; border: 1px solid #FDE68A; display: flex; align-items: center; justify-content: center; color: #92400E; flex-shrink: 0;">
+                            <i data-lucide="map-pin" style="width: 17px; height: 17px;"></i>
+                        </div>
+                        <div>
+                            <label for="location_select" style="display: block; font-size: 13px; font-weight: 700; color: #1E293B; margin-bottom: 2px;">
+                                Lokasi / Wilayah Acara Anda
+                            </label>
+                            <span class="caption" style="color: #64748B; font-size: 11.5px;">
+                                Digunakan untuk menyaring vendor yang beroperasi di sekitar lokasi acara Anda.
+                            </span>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; flex: 1; justify-content: flex-end;">
+                        <div style="min-width: 250px; max-width: 340px; width: 100%;">
+                            @php
+                                $selectedLoc = $location ?? request('location', request('wilayah', ''));
+                            @endphp
+                            <select name="location" id="location_select" class="form-select" style="height: 40px; font-size: 13px; border-radius: 8px; border-color: #CBD5E1; background-color: #FFFFFF; font-weight: 500;">
+                                <option value="">🌐 Semua Wilayah (Tanpa Filter Jarak Spesifik)</option>
+                                <option value="Tanjung Morawa" {{ $selectedLoc === 'Tanjung Morawa' ? 'selected' : '' }}>📍 Kec. Tanjung Morawa (Kab. Deli Serdang)</option>
+                                <option value="Batang Kuis" {{ $selectedLoc === 'Batang Kuis' ? 'selected' : '' }}>📍 Kec. Batang Kuis (Kab. Deli Serdang)</option>
+                                <option value="Deli Serdang" {{ $selectedLoc === 'Deli Serdang' ? 'selected' : '' }}>📍 Kab. Deli Serdang (Umum / Sekitarnya)</option>
+                                <option value="Medan" {{ $selectedLoc === 'Medan' ? 'selected' : '' }}>📍 Kota Medan</option>
+                                <option value="Kisaran" {{ $selectedLoc === 'Kisaran' ? 'selected' : '' }}>📍 Kota Kisaran (Kab. Asahan)</option>
+                                <option value="Lubuk Pakam" {{ $selectedLoc === 'Lubuk Pakam' ? 'selected' : '' }}>📍 Kec. Lubuk Pakam (Kab. Deli Serdang)</option>
+                                <option value="Binjai" {{ $selectedLoc === 'Binjai' ? 'selected' : '' }}>📍 Kota Binjai</option>
+                                <option value="Tebing Tinggi" {{ $selectedLoc === 'Tebing Tinggi' ? 'selected' : '' }}>📍 Kota Tebing Tinggi</option>
+                                <option value="Lainnya" {{ $selectedLoc === 'Lainnya' ? 'selected' : '' }}>📍 Wilayah Lainnya / Luar Kota</option>
+                            </select>
+                        </div>
+
+                        <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #475569; cursor: pointer; user-select: none;">
+                            <input type="checkbox" name="strict_location" value="1" {{ !empty($strictLocation) || request('strict_location') ? 'checked' : '' }} style="accent-color: #C5A059; width: 15px; height: 15px;">
+                            <span>Hanya tampilkan vendor wilayah ini</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
             @php
                 $allPrefOptions = [
                     'low_price' => [
-                        'code' => 'C5',
+                        'code' => 'C1',
                         'type' => 'Cost',
                         'label' => 'Harga Paling Terjangkau',
                         'sub' => 'Efisiensi anggaran total biaya paket',
                     ],
-                    'kualitas_flawless' => [
-                        'code' => 'C1',
-                        'type' => 'Benefit',
-                        'label' => 'Kualitas Riasan Flawless',
-                        'sub' => 'Riasan tahan lama, halus & teruji',
-                    ],
-                    'estetik_modern' => [
+                    'biaya_tambahan' => [
                         'code' => 'C2',
-                        'type' => 'Benefit',
-                        'label' => 'Estetika & Konsep Modern',
-                        'sub' => 'Desain pelaminan mewah & estetis',
+                        'type' => 'Cost',
+                        'label' => 'Minim Biaya Tambahan',
+                        'sub' => 'Estimasi biaya transportasi luar area & overtime minim',
                     ],
                     'paket_lengkap' => [
                         'code' => 'C3',
                         'type' => 'Benefit',
-                        'label' => 'Kelengkapan Paket All-In',
-                        'sub' => 'Fasilitas rias, gaun, dekor & aksesoris',
+                        'label' => 'Kelengkapan Fasilitas All-In',
+                        'sub' => 'Fasilitas rias, gaun, tenda, pelaminan & dokumentasi',
                     ],
-                    'rating_ulasan' => [
+                    'fleksibilitas' => [
                         'code' => 'C4',
                         'type' => 'Benefit',
-                        'label' => 'Rating & Ulasan Terbaik',
-                        'sub' => 'Tingkat kepuasan pengantin tertinggi',
+                        'label' => 'Fleksibilitas Layanan Tinggi',
+                        'sub' => 'Kemudahan penyesuaian jadwal, pergantian busana/adat & konsep acara',
+                    ],
+                    'kualitas_flawless' => [
+                        'code' => 'C5',
+                        'type' => 'Benefit',
+                        'label' => 'Kualitas Riasan Flawless',
+                        'sub' => 'Riasan tahan lama, halus & teruji',
                     ],
                     'keamanan_risiko' => [
                         'code' => 'C6',
-                        'type' => 'Benefit',
+                        'type' => 'Cost',
                         'label' => 'Garansi & Bebas Risiko',
-                        'sub' => 'Jaminan busana, fasilitas & kebersihan',
+                        'sub' => 'Jaminan busana, keamanan properti & kebersihan',
                     ],
-                    'terdekat' => [
+                    'estetik_modern' => [
                         'code' => 'C7',
                         'type' => 'Benefit',
-                        'label' => 'Lokasi Terdekat / Respon Cepat',
-                        'sub' => 'Efisiensi jarak jangkau vendor & respon',
+                        'label' => 'Estetika & Konsep Modern',
+                        'sub' => 'Desain pelaminan mewah, artistik & estetis',
                     ],
                     'tradisional_adat' => [
-                        'code' => 'C2 & C3',
+                        'code' => 'C3 & C7',
                         'type' => 'Benefit',
                         'label' => 'Pakem Busana Adat',
                         'sub' => 'Kelengkapan adat nusantara terstruktur',
@@ -159,8 +203,8 @@
                     <label class="spk-pref-card {{ $isChecked ? 'is-active' : '' }}" onclick="this.classList.toggle('is-active', this.querySelector('input').checked)">
                         <div>
                             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-                                <span style="font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; background: {{ $opt['type'] === 'Cost' ? '#FEF2F2' : '#F0FDF4' }}; color: {{ $opt['type'] === 'Cost' ? '#991B1B' : '#166534' }}; letter-spacing: 0.03em;">
-                                    {{ $opt['code'] }} &bull; {{ $opt['type'] }}
+                                <span style="font-size: 11px; font-weight: 600; color: #475569;">
+                                    Aspek Layanan
                                 </span>
                                 <input type="checkbox" name="preferences[]" value="{{ $key }}" {{ $isChecked ? 'checked' : '' }} 
                                        style="accent-color: #775A19; width: 16px; height: 16px; cursor: pointer;"
@@ -183,7 +227,7 @@
                     @foreach($preferences as $p)
                         @if(isset($allPrefOptions[$p]))
                             <span class="badge" style="background: #FFFBEB; color: #92400E; border: 1px solid #FDE68A; font-size: 11px;">
-                                {{ $allPrefOptions[$p]['label'] }} ({{ $allPrefOptions[$p]['code'] }})
+                                {{ $allPrefOptions[$p]['label'] }}
                             </span>
                         @endif
                     @endforeach
@@ -209,9 +253,28 @@
             </button>
         </div>
 
+        @php
+            $activeLoc = $marcosData['active_location'] ?? ($location ?? null);
+        @endphp
+
+        @if(!empty($activeLoc))
+            <div style="background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 10px; padding: 12px 18px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i data-lucide="compass" style="width: 18px; height: 18px; color: #059669; flex-shrink: 0;"></i>
+                    <div style="font-size: 13px; color: #065F46;">
+                        Rekomendasi dioptimalkan untuk Lokasi Acara: <strong>{{ $activeLoc }}</strong>. 
+                        Paket telah diselaraskan dengan estimasi jarak vendor ke venue Anda.
+                    </div>
+                </div>
+                <span class="badge badge-success" style="font-size: 11px;">
+                    Kedekatan Lokasi Terintegrasi
+                </span>
+            </div>
+        @endif
+
         <!-- Kartu Narasi Peringkat Formal -->
         <div style="display: flex; flex-direction: column; gap: 20px;">
-            @foreach($marcosData['rankings'] as $item)
+            @forelse($marcosData['rankings'] as $item)
                 @php
                     $rank = $item['rank'];
                     $rankTitle = match($rank) {
@@ -231,12 +294,14 @@
                         2 => 'badge-narrative-moss',
                         default => 'badge-narrative-soft',
                     };
+                    $vendorRegion = $item['vendor_region'] ?? ($item['vendor']?->region ?? 'Deli Serdang');
                     $cityName = $item['vendor']->city ?? ($item['vendor']->location_address ?? 'Sumatera Utara');
+                    $prox = $item['proximity'] ?? null;
                 @endphp
                 <div class="card-kabut" style="display: flex; flex-direction: row; gap: 28px; align-items: center; flex-wrap: wrap;">
-                    <!-- Thumbnail -->
-                    <div style="width: 220px; flex-shrink: 0;">
-                        <img src="{{ $item['thumbnail'] }}" alt="{{ $item['package_name'] }}" class="img-cover-box" style="height: 150px; width: 100%;">
+                    <!-- Thumbnail Poster Utuh Tanpa Terpotong -->
+                    <div style="width: 190px; height: 260px; flex-shrink: 0; background: #141E1C; border-radius: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+                        <img src="{{ $item['thumbnail'] }}" alt="{{ $item['package_name'] }}" style="width: 100%; height: 100%; object-fit: contain; display: block;" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80';">
                     </div>
 
                     <!-- Informasi Paket & Narasi Formal -->
@@ -249,18 +314,57 @@
                                 <i data-lucide="store" style="width: 13px; height: 13px; color: var(--muted);"></i>
                                 {{ $item['vendor_name'] }}
                             </span>
+                            <span class="badge" style="background: #F1F5F9; color: #475569; font-size: 11px; border: 1px solid #E2E8F0;">
+                                📍 Area: {{ $vendorRegion }}
+                            </span>
+
+                            @if($prox)
+                                <span class="badge" style="background: {{ $prox['badge_bg'] }}; color: {{ $prox['badge_color'] }}; border: 1px solid {{ $prox['badge_border'] }}; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+                                    <i data-lucide="map-pin" style="width: 11px; height: 11px;"></i>
+                                    {{ $prox['label'] }} ({{ $prox['distance_km'] }})
+                                </span>
+                            @endif
+
                             <span class="badge badge-moss" style="font-size: 0.72rem;">Mitra Terverifikasi</span>
                         </div>
 
                         <h3 style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 500; margin-bottom: 8px;">
                             <a href="{{ route('bundling.detail', $item['bundling_id']) }}">
+                                @if(!empty($item['code']))
+                                    <span style="font-size: 11px; font-weight: 700; background: #0D0C22; color: #FFFFFF; padding: 3px 8px; border-radius: 4px; margin-right: 6px;">{{ $item['code'] }}</span>
+                                @endif
                                 {{ $item['package_name'] }}
                             </a>
                         </h3>
 
+                        @if(!empty($item['features']) && count($item['features']) > 0)
+                            <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px;">
+                                @foreach(array_slice($item['features'], 0, 3) as $feat)
+                                    <span style="font-size: 11px; background: #F8FAFC; border: 1px solid #E2E8F0; color: #334155; padding: 2px 8px; border-radius: 4px;">
+                                        ✓ {{ Str::limit($feat, 34) }}
+                                    </span>
+                                @endforeach
+                                @if(count($item['features']) > 3)
+                                    <span style="font-size: 11px; color: #64748B; padding: 2px 4px;">+{{ count($item['features']) - 3 }} fasilitas lainnya</span>
+                                @endif
+                            </div>
+                        @endif
+
                         <p class="body-sm" style="line-height: 1.6; color: var(--body); margin-bottom: 12px;">
                             {{ $rankNarration }}
                         </p>
+
+                        @if($prox && $prox['is_same_region'])
+                            <div style="font-size: 11.5px; color: #166534; font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
+                                <i data-lucide="sparkles" style="width: 13px; height: 13px; color: #16A34A;"></i>
+                                Satu wilayah dengan acara Anda ({{ $activeLoc }}). Respon cepat & hemat biaya transportasi luar kota!
+                            </div>
+                        @elseif($prox && $prox['level'] === 'luar_kota')
+                            <div style="font-size: 11.5px; color: #991B1B; margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
+                                <i data-lucide="alert-circle" style="width: 13px; height: 13px;"></i>
+                                Vendor berdomisili di {{ $vendorRegion }} (~{{ $prox['distance_km'] }}). Mungkin memerlukan koordinasi biaya akomodasi.
+                            </div>
+                        @endif
 
                         <div style="font-size: 0.82rem; color: var(--muted);">
                             Wilayah Layanan: <strong>{{ $cityName }}</strong> &bull; Estimasi Harga: <strong style="color: var(--rust); font-size: 1rem;">Rp {{ number_format($item['price'], 0, ',', '.') }}</strong>
@@ -277,12 +381,28 @@
                         </a>
                     </div>
                 </div>
-            @endforeach
+            @empty
+                <div style="text-align: center; padding: 64px 24px; background: #FFFFFF; border-radius: 16px; border: 1px dashed #CBD5E1; margin-bottom: 24px;">
+                    <i data-lucide="package-search" style="width: 48px; height: 48px; color: #94A3B8; margin: 0 auto 16px;"></i>
+                    <h3 style="font-family: var(--font-heading); font-size: 1.35rem; color: #1E293B; margin-bottom: 8px; font-weight: 600;">
+                        Paket yang direkomendasikan belum ada
+                    </h3>
+                    <p class="body-md" style="color: #64748B; max-width: 520px; margin: 0 auto 20px;">
+                        Evaluasi skor alternatif belum diisi atau sedang dikosongkan oleh administrator.
+                    </p>
+                    @if(auth()->check() && auth()->user()->isAdmin())
+                        <a href="{{ route('admin.evaluations') }}" class="btn btn-primary btn-sm">
+                            Buka Evaluasi Skor Alternatif
+                        </a>
+                    @endif
+                </div>
+            @endforelse
         </div>
     </div>
 
-    <!-- SECTION MATEMATIS MARCOS (DISEMBUNYIKAN SECARA DEFAULT UNTUK KEPERLUAN AUDIT/AKADEMIK) -->
-    <div id="spkMathSection" style="display: none; padding-top: 36px; border-top: 2px dashed var(--line); margin-top: 24px;">
+    @if(auth()->check() && auth()->user()->isAdmin())
+    <!-- SECTION MATEMATIS MARCOS (HANYA UNTUK ADMINISTRATOR / AUDIT AKADEMIK) -->
+    <div id="spkMathSection" style="padding-top: 36px; border-top: 2px dashed var(--line); margin-top: 24px;">
         <div style="background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 28px; margin-bottom: 36px;">
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
                 <span style="display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: var(--moss); color: var(--cream); font-size: 13px; font-weight: 700;">!</span>
@@ -431,6 +551,7 @@
             </div>
         </div>
     </div>
+    @endif
 </div>
 
 @push('scripts')

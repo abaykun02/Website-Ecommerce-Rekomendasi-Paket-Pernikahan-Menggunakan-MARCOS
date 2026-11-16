@@ -31,22 +31,24 @@ Platform E-Marketplace B2C modern untuk pemesanan jasa Make-Up Artist (MUA), Dek
 
 ### 2. SPK MARCOS dengan Dynamic Customer Preference
 Metode MARCOS (Measurement of Alternatives and Ranking according to COmpromise Solution) digunakan untuk merekomendasikan vendor terbaik berdasarkan 7 kriteria multi-dimensi:
-- **C1: Harga Paket / Layanan** (Cost) — Bobot dasar 20%
-- **C2: Portofolio & Pengalaman Acara** (Benefit) — Bobot dasar 15%
-- **C3: Rating & Kepuasan Pelanggan** (Benefit) — Bobot dasar 15%
-- **C4: Kelengkapan Fasilitas & Item** (Benefit) — Bobot dasar 15%
-- **C5: Fleksibilitas Custom & Revisi** (Benefit) — Bobot dasar 10%
-- **C6: Kedekatan Lokasi & Respon Waktu** (Benefit) — Bobot dasar 10%
-- **C7: Kualitas Bahan / Kosmetik & Alat** (Benefit) — Bobot dasar 15%
+- **C1: Kualitas Hasil** (Benefit) — Bobot dasar 20%
+- **C2: Estetika & Desain** (Benefit) — Bobot dasar 20%
+- **C3: Kelengkapan** (Benefit) — Bobot dasar 15%
+- **C4: Jarak** (Cost) — Bobot dasar 10% (semakin dekat jarak tempuh semakin baik)
+- **C5: Harga** (Cost) — Bobot dasar 20% (semakin terjangkau biaya semakin baik)
+- **C6: Risiko Kerusakan** (Cost) — Bobot dasar 5% (potensi risiko properti dekorasi)
+- **C7: Biaya Tambahan** (Cost) — Bobot dasar 10% (estimasi transportasi/overtime)
 
 #### Preferensi Pelanggan Interaktif (Dynamic Preference Weighting):
 Pelanggan dapat memilih preferensi prioritas mereka di Beranda atau halaman Rekomendasi:
-1. `low_price`: Memprioritaskan harga paling terjangkau (Boost bobot C1 sebesar +0.25).
-2. `terdekat`: Mengutamakan vendor terdekat dan respon cepat (Boost bobot C6 sebesar +0.25).
-3. `estetik_modern`: Mengutamakan portofolio desain dan fleksibilitas custom (Boost bobot C2 & C5).
-4. `kualitas_flawless`: Mengutamakan kualitas kosmetik/alat dan rating tinggi (Boost bobot C7 & C3).
-5. `paket_lengkap`: Mengutamakan kelengkapan fasilitas & bonus (Boost bobot C4 sebesar +0.25).
-6. `tradisional_adat`: Mengutamakan pengalaman jam terbang busana & paes adat (Boost bobot C2 & C7).
+1. `low_price`: Memprioritaskan harga paling terjangkau (Boost bobot C5 Harga).
+2. `kualitas_flawless`: Mengutamakan kehalusan make-up dan ketahanan riasan (Boost bobot C1).
+3. `estetik_modern`: Mengutamakan desain pelaminan dan tren visual modern (Boost bobot C2).
+4. `paket_lengkap`: Mengutamakan kelengkapan fasilitas & paket all-in (Boost bobot C3).
+5. `terdekat`: Mengutamakan jarak terdekat ke lokasi acara (Boost bobot C4 Jarak).
+6. `keamanan_risiko`: Mengutamakan garansi busana dan minim risiko (Boost bobot C6).
+7. `biaya_tambahan`: Mengutamakan vendor tanpa biaya tambahan / transport minim (Boost bobot C7).
+8. `tradisional_adat`: Mengutamakan nuansa adat nusantara (Boost bobot C2 & C3).
 
 Setiap pemilihan preferensi dinormalisasi ulang secara otomatis sehingga total bobot kriteria tetap:
 $$\sum_{j=1}^{m} w_j = 1.0000$$

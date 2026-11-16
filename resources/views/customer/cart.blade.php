@@ -39,7 +39,7 @@
                     <span style="font-weight: 700; font-size: 1.05rem; color: var(--ink);">
                         Daftar Item ({{ $cartItems->sum('quantity') }} Layanan)
                     </span>
-                    <form action="{{ route('customer.cart.clear') }}" method="POST" onsubmit="return confirm('Kosongkan semua item di keranjang?');">
+                    <form action="{{ route('customer.cart.clear') }}" method="POST" onsubmit="return confirmDelete(event, this, 'Apakah Anda yakin ingin mengosongkan semua item di keranjang belanja?');">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn btn-tertiary" style="color: var(--error); font-size: 12px; padding: 4px 8px;">
@@ -107,7 +107,7 @@
                                     </div>
                                 @endif
                             </div>
-
+                            
                             <!-- Quantity & Action -->
                             <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 10px;">
                                 <div style="font-weight: 700; font-size: 1.1rem; color: var(--ink);">
@@ -121,7 +121,7 @@
                                     <input type="number" name="quantity" value="{{ $item->quantity }}" min="1" max="20" style="width: 54px; height: 32px; padding: 2px 6px; font-size: 13px; text-align: center; border: 1px solid var(--line); border-radius: 6px;" onchange="this.form.submit()">
                                 </form>
 
-                                <form action="{{ route('customer.cart.remove', $item->id) }}" method="POST" style="margin: 0;" onsubmit="return confirm('Hapus item ini dari keranjang?');">
+                                <form action="{{ route('customer.cart.remove', $item->id) }}" method="POST" style="margin: 0;" onsubmit="return confirmDelete(event, this, 'Apakah Anda yakin ingin menghapus item ini dari keranjang?');">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-tertiary" style="color: var(--error); padding: 4px 6px; font-size: 11px; height: auto;">

@@ -25,15 +25,15 @@
             </a>
         </div>
     @else
-        <div class="card-kabut" style="padding: 0; border-radius: 16px; overflow: hidden; display: grid; grid-template-columns: 320px 1fr; min-height: 600px; max-height: 720px; box-shadow: var(--shadow-tier1);">
+        <div class="card-kabut" style="padding: 0; border-radius: 16px; overflow: hidden; display: grid; grid-template-columns: 320px 1fr; height: 680px; max-height: calc(100vh - 180px); min-height: 560px; box-shadow: var(--shadow-tier1);">
             <!-- Sidebar: Conversations List -->
-            <div style="border-right: 1px solid var(--line); display: flex; flex-direction: column; background: var(--surface-low);">
-                <div style="padding: 18px 20px; border-bottom: 1px solid var(--line); font-weight: 700; font-size: 1rem; color: var(--ink); display: flex; justify-content: space-between; align-items: center;">
+            <div style="border-right: 1px solid var(--line); display: flex; flex-direction: column; background: var(--surface-low); min-height: 0; height: 100%; overflow: hidden;">
+                <div style="padding: 18px 20px; border-bottom: 1px solid var(--line); font-weight: 700; font-size: 1rem; color: var(--ink); display: flex; justify-content: space-between; align-items: center; background: #fff; flex-shrink: 0;">
                     <span>Daftar Pelanggan</span>
                     <span class="badge badge-moss" style="font-size: 10px;">{{ $conversations->count() }} Percakapan</span>
                 </div>
 
-                <div style="overflow-y: auto; flex: 1;">
+                <div style="overflow-y: auto; flex: 1 1 0%; min-height: 0;">
                     @foreach($conversations as $c)
                         @php
                             $isActive = $activeConversation && $activeConversation->id === $c->id;
@@ -77,11 +77,11 @@
 
             <!-- Chat Room Area -->
             @if($activeConversation)
-                <div style="display: flex; flex-direction: column; background: #fff; height: 100%;">
+                <div style="display: flex; flex-direction: column; background: #fff; height: 100%; min-height: 0; overflow: hidden; position: relative;">
                     <!-- Chat Header -->
-                    <div style="padding: 16px 24px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; background: #fff;">
+                    <div style="flex-shrink: 0; padding: 16px 24px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; background: #fff; z-index: 5;">
                         <div style="display: flex; align-items: center; gap: 12px;">
-                            <div style="width: 42px; height: 42px; border-radius: 50%; background: var(--blush-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 700;">
+                            <div style="width: 42px; height: 42px; border-radius: 50%; background: var(--blush-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0;">
                                 <i data-lucide="user" style="width: 20px; height: 20px;"></i>
                             </div>
                             <div>
@@ -104,14 +104,14 @@
 
                     <!-- Linked Order Banner if present -->
                     @if($activeConversation->order)
-                        <div style="background: var(--surface-low); padding: 8px 24px; border-bottom: 1px solid var(--line); font-size: 12px; display: flex; justify-content: space-between; align-items: center;">
+                        <div style="flex-shrink: 0; background: var(--surface-low); padding: 8px 24px; border-bottom: 1px solid var(--line); font-size: 12px; display: flex; justify-content: space-between; align-items: center;">
                             <span>Pesanan Terkait: <strong>#{{ $activeConversation->order->order_code }}</strong> &bull; Total: Rp {{ number_format($activeConversation->order->total_price, 0, ',', '.') }} (Status: {{ $activeConversation->order->status_label }})</span>
                             <span class="badge badge-moss" style="font-size: 10px;">{{ $activeConversation->order->event_date->format('d M Y') }}</span>
                         </div>
                     @endif
 
                     <!-- Message Feed -->
-                    <div id="vendorMessageFeed" style="flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 14px; background: #FAF9F6;">
+                    <div id="vendorMessageFeed" style="flex: 1 1 0%; min-height: 0; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 14px; background: #FAF9F6;">
                         @if($activeConversation->messages->isEmpty())
                             <div id="vendorEmptyFeedNotice" style="text-align: center; color: var(--muted); margin: auto; font-size: 0.9rem;">
                                 <i data-lucide="messages-square" style="width: 32px; height: 32px; margin-bottom: 8px; opacity: 0.4;"></i>
@@ -138,11 +138,13 @@
                     </div>
 
                     <!-- Chat Input Box -->
-                    <div style="padding: 16px 24px; border-top: 1px solid var(--line); background: #fff;">
-                        <form id="vendorChatForm" action="{{ route('vendor.chat.send', $activeConversation->id) }}" method="POST" style="display: flex; gap: 12px; margin: 0;">
+                    <div style="flex-shrink: 0; padding: 14px 20px; border-top: 1px solid var(--line); background: #fff; z-index: 10; box-shadow: 0 -3px 12px rgba(0,0,0,0.03);">
+                        <form id="vendorChatForm" action="{{ route('vendor.chat.send', $activeConversation->id) }}" method="POST" style="display: flex; gap: 10px; margin: 0; align-items: center; width: 100%;">
                             @csrf
-                            <input type="text" id="vendorChatInput" name="message" class="form-input" placeholder="Ketik balasan Anda untuk pelanggan di sini..." autocomplete="off" required style="height: 44px; border-radius: 999px; padding: 0 20px;">
-                            <button type="submit" id="vendorChatSendBtn" class="btn btn-primary" style="height: 44px; border-radius: 999px; padding: 0 22px; display: inline-flex; align-items: center; gap: 6px;">
+                            <div style="flex: 1; min-width: 0;">
+                                <input type="text" id="vendorChatInput" name="message" class="form-input" placeholder="Ketik balasan Anda untuk pelanggan di sini..." autocomplete="off" required style="width: 100%; height: 46px; border-radius: 999px; padding: 0 20px; font-size: 13.5px; border: 1.5px solid #E5E7EB; background: #FAFAFA;">
+                            </div>
+                            <button type="submit" id="vendorChatSendBtn" class="btn btn-primary" style="flex-shrink: 0; height: 46px; border-radius: 999px; padding: 0 22px; display: inline-flex; align-items: center; gap: 8px; font-weight: 600; font-size: 13.5px; cursor: pointer;">
                                 <i data-lucide="send" style="width: 15px; height: 15px;"></i>
                                 <span>Kirim</span>
                             </button>

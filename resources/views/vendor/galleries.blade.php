@@ -40,7 +40,11 @@
 
                 <div class="form-group">
                     <label class="form-label" for="image">Berkas Gambar (File Foto)</label>
-                    <input type="file" name="image" id="image" class="input-pill" accept="image/*" style="padding-top: 12px;">
+                    <input type="file" name="image" id="image" class="input-pill enable-cropper" accept="image/*" style="padding-top: 12px;">
+                    <div style="font-size: 11px; color: var(--muted); margin-top: 5px; display: flex; align-items: center; gap: 4px;">
+                        <i data-lucide="scissors" style="width: 12px; height: 12px; color: var(--primary);"></i>
+                        <span>Dilengkapi alat potong (crop) otomatis saat memilih berkas.</span>
+                    </div>
                 </div>
             </div>
 
@@ -76,7 +80,7 @@
                         @endif
                     </div>
 
-                    <form action="{{ route('vendor.gallery.delete', $gal->id) }}" method="POST" onsubmit="return confirm('Hapus foto ini dari galeri?');">
+                    <form action="{{ route('vendor.gallery.delete', $gal->id) }}" method="POST" onsubmit="return confirmDelete(event, this, 'Apakah Anda yakin ingin menghapus foto ini dari galeri?');">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn btn-secondary btn-sm" style="color: var(--color-error); padding: 0 10px; height: 28px;" title="Hapus Foto">
@@ -96,4 +100,7 @@
         {{ $galleries->links() }}
     </div>
 </div>
+
+@include('partials.image-cropper-modal')
+
 @endsection

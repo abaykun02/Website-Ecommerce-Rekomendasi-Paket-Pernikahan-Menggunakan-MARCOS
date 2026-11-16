@@ -51,9 +51,31 @@ class ChatController extends Controller
             $activeConversation = $activeQuery->find($activeId);
         }
 
+        // List of all vendors for starting new chats
+        $vendors = Vendor::orderBy('vendor_name')->get();
+
         if (!$activeConversation && $conversations->isNotEmpty()) {
             $activeConversation = ChatConversation::with(['vendor', 'messages.sender', 'order'])
                 ->find($conversations->first()->id);
+        } elseif (!$activeConversation && $vendors->isNotEmpty() && !$user->isAdmin()) {
+            // Auto-initialize with requested vendor or first available vendor
+            $targetVendorId = $request->query('vendor');
+            $targetVendor = $targetVendorId ? $vendors->firstWhere('id', $targetVendorId) : $vendors->first();
+
+            if ($targetVendor && (!$user->vendor || $user->vendor->id !== $targetVendor->id)) {
+                $activeConversation = ChatConversation::firstOrCreate(
+                    [
+                        'customer_id' => $userId,
+                        'vendor_id' => $targetVendor->id,
+                    ],
+                    [
+                        'last_message_at' => now(),
+                    ]
+                );
+                $activeConversation->load(['vendor', 'messages.sender', 'order']);
+                // Refresh conversations list
+                $conversations = $query->orderByDesc('last_message_at')->get();
+            }
         }
 
         // Mark incoming messages as read
@@ -64,7 +86,7 @@ class ChatController extends Controller
                 ->update(['is_read' => true]);
         }
 
-        return view('customer.chat', compact('conversations', 'activeConversation'));
+        return view('customer.chat', compact('conversations', 'activeConversation', 'vendors'));
     }
 
     /**

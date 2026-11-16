@@ -21,7 +21,7 @@
                     Keanggunan Tradisi Bertemu Kepastian Analitik
                 </h2>
                 <p style="font-size: 13.5px; color: #D1C5B4; line-height: 1.6;">
-                    Kurasi paket MUA dan dekorasi pelaminan terbaik dengan pendampingan objektif Sistem Pendukung Keputusan MARCOS.
+                    Kurasi paket MUA dan dekorasi pelaminan terbaik yang dirancang khusus untuk mewujudkan pernikahan impian Anda.
                 </p>
             </div>
 
@@ -153,13 +153,17 @@
 @if($showModal)
 <div id="loginErrorModal" class="modal-backdrop-luxury active" role="dialog" aria-modal="true" style="display: flex; z-index: 99999;">
     <div class="modal-box-luxury" style="max-width: 440px; text-align: center; border: 1px solid rgba(229,72,77,0.3); box-shadow: 0 20px 45px rgba(0,0,0,0.22); animation: modalBounceIn 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
-        <div class="modal-icon-luxury" style="background: linear-gradient(135deg, #FFF5F5 0%, #FEE2E2 100%); border: 1.5px solid rgba(229,72,77,0.4); color: #DC2626; box-shadow: 0 4px 14px rgba(220,38,38,0.2); display: flex; align-items: center; justify-content: center;">
+        <div class="modal-icon-luxury" style="background: {{ $modalType === 'pending_verification' ? 'linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%)' : 'linear-gradient(135deg, #FFF5F5 0%, #FEE2E2 100%)' }}; border: 1.5px solid {{ $modalType === 'pending_verification' ? 'rgba(217,119,6,0.4)' : 'rgba(229,72,77,0.4)' }}; color: {{ $modalType === 'pending_verification' ? '#D97706' : '#DC2626' }}; box-shadow: 0 4px 14px {{ $modalType === 'pending_verification' ? 'rgba(217,119,6,0.2)' : 'rgba(220,38,38,0.2)' }}; display: flex; align-items: center; justify-content: center;">
             @if($modalType === 'wrong_password')
                 <i data-lucide="lock-keyhole" style="width: 32px; height: 32px; color: #DC2626;"></i>
             @elseif($modalType === 'user_not_found')
                 <i data-lucide="user-x" style="width: 32px; height: 32px; color: #DC2626;"></i>
             @elseif($modalType === 'inactive')
                 <i data-lucide="shield-alert" style="width: 32px; height: 32px; color: #DC2626;"></i>
+            @elseif($modalType === 'pending_verification')
+                <i data-lucide="clock-3" style="width: 32px; height: 32px; color: #D97706;"></i>
+            @elseif($modalType === 'rejected')
+                <i data-lucide="user-x" style="width: 32px; height: 32px; color: #DC2626;"></i>
             @else
                 <i data-lucide="alert-circle" style="width: 32px; height: 32px; color: #DC2626;"></i>
             @endif

@@ -204,8 +204,9 @@ class CartController extends Controller
 
         // Determine vendor (use vendor from first item if single or multiple)
         $primaryVendor = $cartItems->first()->vendor ?? $cartItems->first()->bundling?->vendor ?? $cartItems->first()->serviceItem?->vendor;
+        $regions = \App\Models\Vendor::REGIONS;
 
-        return view('customer.checkout', compact('cartItems', 'subtotal', 'user', 'primaryVendor'));
+        return view('customer.checkout', compact('cartItems', 'subtotal', 'user', 'primaryVendor', 'regions'));
     }
 
     /**
@@ -230,11 +231,14 @@ class CartController extends Controller
             'customer_phone' => ['required', 'string', 'max:30'],
             'event_date' => ['required', 'date', 'after_or_equal:today'],
             'event_time' => ['nullable', 'string', 'max:50'],
+            'event_region' => ['nullable', 'string', 'max:100'],
             'event_location' => ['required', 'string', 'max:500'],
             'payment_type' => ['required', 'in:dp,full_payment'],
             'dp_percentage' => ['nullable', 'in:30,50'],
             'notes' => ['nullable', 'string', 'max:1000'],
         ]);
+
+        $eventRegion = $validated['event_region'] ?: \App\Models\Vendor::normalizeRegionName($validated['event_location']);
 
         $subtotal = (float) $cartItems->sum(function ($item) {
             return $item->subtotal;
@@ -269,6 +273,7 @@ class CartController extends Controller
                 'event_date' => $validated['event_date'],
                 'event_time' => $validated['event_time'] ?: '08:00 WIB',
                 'event_location' => $validated['event_location'],
+                'event_region' => $eventRegion,
                 'total_price' => $subtotal,
                 'payment_type' => $paymentType,
                 'dp_amount' => $dpAmount,
@@ -308,10 +313,14 @@ class CartController extends Controller
             return back()->with('error', 'Gagal memproses checkout: ' . $e->getMessage())->withInput();
         }
 
-        // Generate Snap Token
-        $this->midtransService->createSnapToken($order);
+        // Generate Snap Token secara opsional (aman dan tidak memblokir pesanan)
+        try {
+            $this->midtransService->createSnapToken($order);
+        } catch (\Throwable $e) {
+            \Log::info('Midtrans snap token skipped: ' . $e->getMessage());
+        }
 
         return redirect()->route('customer.order.detail', $order->id)
-            ->with('success', "Pesanan #{$order->order_code} berhasil dibuat! Anda dapat langsung melakukan pembayaran melalui Midtrans.");
+            ->with('success', "Pesanan #{$order->order_code} berhasil dibuat! Silakan lakukan pembayaran melalui transfer bank atau gunakan opsi payment gateway.");
     }
 }

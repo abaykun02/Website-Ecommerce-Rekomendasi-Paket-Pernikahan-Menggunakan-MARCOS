@@ -20,11 +20,11 @@
         <div>
             @php
                 $mainImg = $service->image_url 
-                    ?? $service->vendor->galleries->first()?->url 
-                    ?? 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80';
+                    ?: ($service->vendor->galleries->first()?->url 
+                    ?: asset('storage/catalog_photos/Medium Pakage.jpeg'));
             @endphp
             <div style="margin-bottom: 20px; border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--line); position: relative; background: var(--line);">
-                <img id="mainServiceImg" src="{{ $mainImg }}" alt="{{ $service->name }}" style="width: 100%; max-height: 480px; object-fit: cover; display: block;" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80';">
+                <img id="mainServiceImg" src="{{ $mainImg }}" alt="{{ $service->name }}" style="width: 100%; max-height: 480px; object-fit: cover; display: block;" onerror="this.onerror=null; this.src='{{ asset('storage/catalog_photos/Medium Pakage.jpeg') }}';">
                 <div style="position: absolute; top: 16px; left: 16px; display: flex; gap: 8px;">
                     <span class="badge badge-moss">{{ $service->category->name }}</span>
                     <span class="badge badge-primary">{{ $service->vendor->vendor_name }}</span>
@@ -132,6 +132,23 @@
                             </div>
 
                             <div class="form-group" style="margin-bottom: 14px;">
+                                <label class="form-label" for="event_region">Wilayah / Kecamatan Acara *</label>
+                                <select name="event_region" id="event_region" class="form-select" required onchange="checkServiceProximity(this.value)">
+                                    <option value="">-- Pilih Wilayah Acara --</option>
+                                    <option value="Tanjung Morawa" {{ old('event_region') === 'Tanjung Morawa' ? 'selected' : '' }}>Kec. Tanjung Morawa (Kab. Deli Serdang)</option>
+                                    <option value="Batang Kuis" {{ old('event_region') === 'Batang Kuis' ? 'selected' : '' }}>Kec. Batang Kuis (Kab. Deli Serdang)</option>
+                                    <option value="Lubuk Pakam" {{ old('event_region') === 'Lubuk Pakam' ? 'selected' : '' }}>Kec. Lubuk Pakam (Kab. Deli Serdang)</option>
+                                    <option value="Deli Serdang" {{ old('event_region') === 'Deli Serdang' ? 'selected' : '' }}>Kabupaten Deli Serdang (Umum)</option>
+                                    <option value="Medan" {{ old('event_region') === 'Medan' ? 'selected' : '' }}>Kota Medan</option>
+                                    <option value="Kisaran" {{ old('event_region') === 'Kisaran' ? 'selected' : '' }}>Kota Kisaran (Kab. Asahan)</option>
+                                    <option value="Binjai" {{ old('event_region') === 'Binjai' ? 'selected' : '' }}>Kota Binjai</option>
+                                    <option value="Tebing Tinggi" {{ old('event_region') === 'Tebing Tinggi' ? 'selected' : '' }}>Kota Tebing Tinggi</option>
+                                    <option value="Lainnya" {{ old('event_region') === 'Lainnya' ? 'selected' : '' }}>Wilayah Lainnya / Luar Kota</option>
+                                </select>
+                                <div id="serviceProxFeedback" style="display: none; font-size: 11px; margin-top: 4px; padding: 4px 8px; border-radius: 4px;"></div>
+                            </div>
+
+                            <div class="form-group" style="margin-bottom: 14px;">
                                 <label class="form-label" for="event_location">Alamat / Lokasi Lengkap Acara *</label>
                                 <textarea name="event_location" id="event_location" class="form-textarea" rows="2" placeholder="Alamat rumah / nama gedung lokasi..." required>{{ old('event_location') }}</textarea>
                             </div>
@@ -228,6 +245,30 @@
                                 } else {
                                     billEl.textContent = formatRupiah(serviceBasePrice);
                                     remEl.textContent = formatRupiah(0);
+                                }
+                            }
+
+                            const directVendorRegion = "{{ $service->vendor?->region ?? 'Deli Serdang' }}";
+                            function checkServiceProximity(custRegion) {
+                                const feedback = document.getElementById('serviceProxFeedback');
+                                if (!feedback) return;
+                                if (!custRegion) {
+                                    feedback.style.display = 'none';
+                                    return;
+                                }
+                                feedback.style.display = 'block';
+                                if (custRegion === directVendorRegion) {
+                                    feedback.style.background = '#DCFCE7';
+                                    feedback.style.color = '#166534';
+                                    feedback.innerHTML = '✨ <strong>Satu Wilayah:</strong> Vendor & venue berada di ' + directVendorRegion + ' (Bebas Biaya Transport Tambahan).';
+                                } else if (directVendorRegion === 'Kisaran' || custRegion === 'Kisaran' || custRegion === 'Lainnya') {
+                                    feedback.style.background = '#FEE2E2';
+                                    feedback.style.color = '#991B1B';
+                                    feedback.innerHTML = '⚠️ <strong>Luar Kota:</strong> Jarak vendor cukup jauh (~135-155 km). Diskusikan transport via chat.';
+                                } else {
+                                    feedback.style.background = '#E0F2FE';
+                                    feedback.style.color = '#0369A1';
+                                    feedback.innerHTML = '📍 <strong>Dekat / Sedang:</strong> Jarak jangkauan vendor efisien (~10-25 km).';
                                 }
                             }
 

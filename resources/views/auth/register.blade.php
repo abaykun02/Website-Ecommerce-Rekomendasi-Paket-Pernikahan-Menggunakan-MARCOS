@@ -8,23 +8,23 @@
         <div style="text-align: center; margin-bottom: 24px;">
             <span class="badge badge-accent" style="margin-bottom: 8px;">Pendaftaran Akun</span>
             <h1 class="headline-md" style="margin-bottom: 6px;">Registrasi Pelanggan</h1>
-            <p class="body-sm">Pesan riasan pengantin dan dekorasi pelaminan dengan mudah</p>
+            
         </div>
 
         <form action="{{ route('register') }}" method="POST">
             @csrf
             <div class="form-group">
-                <label class="form-label" for="name">Nama Lengkap *</label>
+                <label class="form-label" for="name">Nama Lengkap</label>
                 <input type="text" name="name" id="name" class="input-pill" placeholder="Nama lengkap Anda" value="{{ old('name') }}" required>
             </div>
 
             <div class="form-group">
-                <label class="form-label" for="email">Alamat Email *</label>
+                <label class="form-label" for="email">Alamat Email</label>
                 <input type="email" name="email" id="email" class="input-pill" placeholder="nama@email.com" value="{{ old('email') }}" required>
             </div>
 
             <div class="form-group">
-                <label class="form-label" for="phone">Nomor Telepon / WhatsApp * (Min. 8 digit)</label>
+                <label class="form-label" for="phone">Nomor Telepon / WhatsApp (Min. 8 digit)</label>
                 <input type="tel" name="phone" id="phone" class="input-pill" placeholder="08xxxxxxxx (min. 8 digit)" value="{{ old('phone') }}" required minlength="8">
             </div>
 
@@ -35,11 +35,11 @@
 
             <div class="grid-cols-2" style="gap: 16px; margin-bottom: 20px;">
                 <div>
-                    <label class="form-label" for="password">Kata Sandi *</label>
+                    <label class="form-label" for="password">Kata Sandi</label>
                     <input type="password" name="password" id="password" class="input-pill" placeholder="Kata sandi" required>
                 </div>
                 <div>
-                    <label class="form-label" for="password_confirmation">Konfirmasi Sandi *</label>
+                    <label class="form-label" for="password_confirmation">Konfirmasi Sand</label>
                     <input type="password" name="password_confirmation" id="password_confirmation" class="input-pill" placeholder="Ulangi sandi" required>
                 </div>
             </div>

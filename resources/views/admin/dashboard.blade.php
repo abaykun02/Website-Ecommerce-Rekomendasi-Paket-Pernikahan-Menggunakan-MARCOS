@@ -16,13 +16,30 @@
                 <i data-lucide="calculator" style="width: 14px; height: 14px;"></i>
                 Laporan MARCOS
             </a>
-            <a href="{{ route('home') }}" target="_blank" class="btn btn-secondary btn-sm">
-                <i data-lucide="external-link" style="width: 14px; height: 14px;"></i>
+            <a href="{{ route('home') }}" class="btn btn-secondary btn-sm">
+                <i data-lucide="globe" style="width: 14px; height: 14px;"></i>
                 Lihat Website
             </a>
         </div>
     </div>
 
+    @if(($stats['pending_vendors'] ?? 0) > 0)
+        <div style="background-color: #FFFBEB; border: 1px solid #FCD34D; color: #92400E; padding: 14px 20px; border-radius: 12px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 32px; height: 32px; border-radius: 50%; background: #FDE68A; display: flex; align-items: center; justify-content: center; color: #B45309;">
+                    <i data-lucide="clock" style="width: 18px; height: 18px;"></i>
+                </div>
+                <div>
+                    <strong>{{ $stats['pending_vendors'] }} Pendaftaran Mitra Vendor Menunggu Verifikasi</strong>
+                    <div style="font-size: 12.5px; color: #78350F;">Tinjau profil toko vendor baru agar mereka dapat segera masuk dan mengelola layanan.</div>
+                </div>
+            </div>
+            <a href="{{ route('admin.vendors', ['status' => 'pending']) }}" class="btn btn-sm btn-primary" style="background: #D97706; border-color: #D97706;">
+                <i data-lucide="shield-check" style="width: 14px; height: 14px;"></i>
+                Verifikasi Sekarang
+            </a>
+        </div>
+    @endif
 
     <!-- Stats 6-Card Grid (Minimalist Scale) -->
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; margin-bottom: 28px;">
@@ -51,9 +68,9 @@
         </div>
 
         <div class="card-kabut" style="padding: 16px;">
-            <div class="caption">Menunggu Verifikasi</div>
-            <div style="font-size: 1.45rem; font-weight: 700; color: var(--rust); margin-top: 2px;">{{ $stats['pending_payments'] }}</div>
-            <div class="caption">Perlu tinjauan</div>
+            <div class="caption">Pesanan Pending</div>
+            <div style="font-size: 1.45rem; font-weight: 700; color: var(--rust); margin-top: 2px;">{{ $stats['pending_orders'] ?? $stats['pending_payments'] }}</div>
+            <div class="caption">Menunggu vendor</div>
         </div>
 
         <div class="card-kabut" style="padding: 16px;">
@@ -165,7 +182,12 @@
                                 #{{ $rank['rank'] }}
                             </span>
                             <div>
-                                <div style="font-weight: 600; font-size: 0.82rem; color: var(--ink);">{{ Str::limit($rank['package_name'], 22) }}</div>
+                                <div style="font-weight: 600; font-size: 0.82rem; color: var(--ink);">
+                                    @if(!empty($rank['code']))
+                                        <span style="font-size: 10px; font-weight: 700; background: #0D0C22; color: #FFF; padding: 1px 5px; border-radius: 3px; margin-right: 4px;">{{ $rank['code'] }}</span>
+                                    @endif
+                                    {{ Str::limit($rank['package_name'], 20) }}
+                                </div>
                                 <div class="caption">{{ Str::limit($rank['vendor_name'], 18) }}</div>
                             </div>
                         </div>

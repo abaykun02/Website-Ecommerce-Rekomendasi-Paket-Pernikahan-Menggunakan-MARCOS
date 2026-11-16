@@ -345,6 +345,7 @@
             <thead>
                 <tr>
                     <th style="width: 38px; text-align: center;">Rank</th>
+                    <th style="width: 48px; text-align: center;">Kode</th>
                     <th>Nama Paket Bundling</th>
                     <th>Mitra Vendor</th>
                     <th style="text-align: right; width: 75px;">$K_i^+$ (Ideal)</th>
@@ -371,12 +372,15 @@
                                 #{{ $row['rank'] }}
                             @endif
                         </td>
+                        <td style="text-align: center; font-weight: 700;">
+                            {{ $row['code'] ?? '-' }}
+                        </td>
                         <td><strong>{{ $row['package_name'] }}</strong></td>
                         <td>{{ $row['vendor_name'] }}</td>
                         <td style="text-align: right; font-family: monospace;">{{ number_format($row['K_plus'] ?? $row['k_plus'] ?? 0, 4) }}</td>
                         <td style="text-align: right; font-family: monospace;">{{ number_format($row['K_minus'] ?? $row['k_minus'] ?? 0, 4) }}</td>
                         <td style="text-align: right; font-family: monospace; font-weight: 700; color: #1A2B28;">
-                            {{ number_format($row['final_score'], 4) }}
+                            {{ number_format($row['final_score'], 5) }}
                         </td>
                         <td style="text-align: center;">
                             @if($row['rank'] === 1)

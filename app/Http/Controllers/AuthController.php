@@ -56,6 +56,31 @@ class AuthController extends Controller
 
         // Autentikasi berhasil
         if ($user && $passwordMatches) {
+            // Cek verifikasi khusus role vendor
+            if ($user->isVendor()) {
+                $vendor = $user->vendor;
+                if ($vendor && $vendor->status === 'pending') {
+                    return back()->withErrors([
+                        'email' => 'Pendaftaran akun vendor Anda masih menunggu verifikasi dari Admin.',
+                    ])->with('error_modal', [
+                        'title' => 'Menunggu Verifikasi Admin',
+                        'message' => 'Pendaftaran akun vendor Anda ("' . $vendor->vendor_name . '") berhasil diterima dan saat ini sedang dalam proses verifikasi oleh Administrator. Anda baru dapat masuk setelah akun disetujui.',
+                        'type' => 'pending_verification'
+                    ])->onlyInput('email');
+                }
+
+                if ($vendor && $vendor->status === 'rejected') {
+                    $reason = $vendor->rejection_reason ? ' Catatan admin: "' . $vendor->rejection_reason . '"' : '';
+                    return back()->withErrors([
+                        'email' => 'Pendaftaran akun vendor Anda ditolak oleh Administrator.',
+                    ])->with('error_modal', [
+                        'title' => 'Pendaftaran Vendor Ditolak',
+                        'message' => 'Mohon maaf, pendaftaran akun vendor Anda ("' . $vendor->vendor_name . '") telah ditolak oleh Administrator.' . $reason . ' Silakan hubungi admin untuk konfirmasi lebih lanjut.',
+                        'type' => 'rejected'
+                    ])->onlyInput('email');
+                }
+            }
+
             if ($user->is_active === false) {
                 return back()->withErrors([
                     'email' => 'Akun Anda telah dinonaktifkan oleh administrator. Silakan hubungi admin.',
@@ -172,6 +197,7 @@ class AuthController extends Controller
             'email' => $validated['email'],
             'password' => $validated['password'], // Plain text sesuai instruksi
             'role' => 'vendor',
+            'is_active' => false, // Belum aktif sampai diverifikasi dan disetujui admin
             'phone' => $validated['phone'],
             'address' => $validated['location_address'],
         ]);
@@ -184,10 +210,10 @@ class AuthController extends Controller
             'google_maps_url' => $validated['google_maps_url'] ?? null,
             'phone' => $validated['phone'],
             'description' => $validated['description'] ?? null,
+            'status' => 'pending', // Menunggu persetujuan admin
         ]);
 
-        Auth::login($user);
-        return redirect()->route('vendor.dashboard')->with('success', 'Akun vendor berhasil didaftarkan!');
+        return redirect()->route('login')->with('success', 'Pendaftaran akun vendor berhasil dikirim! Akun Anda sedang menunggu verifikasi dan persetujuan dari Administrator. Anda baru dapat masuk setelah akun diverifikasi.');
     }
 
     public function logout(Request $request)

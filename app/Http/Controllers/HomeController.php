@@ -9,6 +9,8 @@ use App\Models\ServiceItem;
 use App\Models\Vendor;
 use App\Services\MarcosService;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
 
 class HomeController extends Controller
 {
@@ -23,23 +25,44 @@ class HomeController extends Controller
     {
         $rawPref = $request->input('preferences', $request->input('preference', []));
         $preferences = is_array($rawPref) ? array_values(array_filter($rawPref)) : ($rawPref ? [$rawPref] : []);
-        $marcosData = $this->marcosService->calculateRanking($preferences);
+        $location = $request->input('location', $request->input('wilayah', $request->input('lokasi')));
+        $marcosData = $this->marcosService->calculateRanking($preferences, $location);
         $topRecommendations = array_slice($marcosData['rankings'] ?? [], 0, 4);
 
         $bundlings = Bundling::with(['vendor', 'galleries'])
             ->where('is_active', true)
+            ->whereHas('vendor', fn($vq) => $vq->where('status', 'approved'))
             ->latest()
             ->take(8)
             ->get();
 
         $categories = Category::all();
 
+        // Support multi-select categories (array or comma-separated)
+        $rawKategori = $request->input('kategori', $request->input('categories', ['all']));
+        if (is_string($rawKategori)) {
+            $rawKategori = str_contains($rawKategori, ',') ? explode(',', $rawKategori) : [$rawKategori];
+        }
+        $activeCategories = array_values(array_filter((array) $rawKategori));
+        if (empty($activeCategories) || in_array('all', $activeCategories)) {
+            $activeCategories = ['all'];
+        }
+        $activeCategorySlug = implode(',', $activeCategories);
+
         // Get individual service items across categories
-        $activeCategorySlug = $request->input('kategori', 'all');
         $serviceQuery = ServiceItem::with(['vendor', 'category'])->where('is_active', true);
-        if ($activeCategorySlug !== 'all') {
-            $serviceQuery->whereHas('category', function ($q) use ($activeCategorySlug) {
-                $q->where('slug', $activeCategorySlug);
+        if (!in_array('all', $activeCategories)) {
+            $serviceQuery->whereHas('category', function ($q) use ($activeCategories) {
+                $q->whereIn('slug', $activeCategories);
+            });
+        }
+
+        $search = $request->input('search');
+        if (!empty($search)) {
+            $serviceQuery->where(function ($sq) use ($search) {
+                $sq->where('name', 'like', "%{$search}%")
+                   ->orWhere('description', 'like', "%{$search}%")
+                   ->orWhereHas('vendor', fn($vq) => $vq->where('vendor_name', 'like', "%{$search}%"));
             });
         }
         $services = $serviceQuery->latest()->take(12)->get();
@@ -71,6 +94,19 @@ class HomeController extends Controller
 
         $criterias = Criteria::orderBy('code')->get();
 
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'status' => 'success',
+                'recommendations_html' => view('partials.home-recommendations', compact('topRecommendations'))->render(),
+                'services_html' => view('partials.home-services', compact('services'))->render(),
+                'selected_cat_count' => in_array('all', $activeCategories) ? 0 : count($activeCategories),
+                'selected_pref_count' => count($preferences),
+                'active_categories' => $activeCategories,
+                'preferences' => $preferences,
+                'location' => $location,
+            ]);
+        }
+
         return view('home', compact(
             'topRecommendations',
             'bundlings',
@@ -84,7 +120,9 @@ class HomeController extends Controller
             'gownServices',
             'traditionalServices',
             'activeCategorySlug',
+            'activeCategories',
             'preferences',
+            'location',
             'marcosData'
         ));
     }
@@ -92,7 +130,10 @@ class HomeController extends Controller
     public function bundlings(Request $request)
     {
         $query = Bundling::with(['vendor', 'galleries', 'evaluations.criteria'])
-            ->where('is_active', true);
+            ->where('is_active', true)
+            ->whereHas('vendor', function ($vq) {
+                $vq->where('status', 'approved');
+            });
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -113,13 +154,20 @@ class HomeController extends Controller
             $query->where('base_price', '<=', $request->max_price);
         }
 
-        $bundlings = $query->paginate(9)->withQueryString();
-        $vendors = Vendor::all();
+        // Hanya vendor yang berstatus approved dan memiliki paket bundling aktif
+        $vendors = Vendor::where('status', 'approved')
+            ->whereHas('bundlings', function ($bq) {
+                $bq->where('is_active', true);
+            })
+            ->withCount(['bundlings' => fn($bq) => $bq->where('is_active', true)])
+            ->orderBy('vendor_name')
+            ->get();
 
         // Get rank map from MARCOS with active customer multi-preferences
         $rawPref = $request->input('preferences', $request->input('preference', []));
         $preferences = is_array($rawPref) ? array_values(array_filter($rawPref)) : ($rawPref ? [$rawPref] : []);
-        $marcosData = $this->marcosService->calculateRanking($preferences);
+        $location = $request->input('location', $request->input('wilayah', $request->input('lokasi')));
+        $marcosData = $this->marcosService->calculateRanking($preferences, $location);
         $rankMap = [];
         foreach ($marcosData['rankings'] ?? [] as $item) {
             $rankMap[$item['bundling_id']] = [
@@ -128,7 +176,27 @@ class HomeController extends Controller
             ];
         }
 
-        return view('marketplace.bundlings', compact('bundlings', 'vendors', 'rankMap', 'preferences'));
+        // Urutkan paket berdasarkan urutan ranking SPK MARCOS (Peringkat #1, #2, #3, dst.)
+        $items = $query->get()->sortBy(function ($item) use ($rankMap) {
+            return $rankMap[$item->id]['rank'] ?? 999999;
+        })->values();
+
+        $perPage = 9;
+        $currentPage = Paginator::resolveCurrentPage() ?: 1;
+        $currentItems = $items->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
+        $bundlings = new LengthAwarePaginator(
+            $currentItems,
+            $items->count(),
+            $perPage,
+            $currentPage,
+            [
+                'path' => Paginator::resolveCurrentPath(),
+                'query' => $request->query(),
+            ]
+        );
+
+        return view('marketplace.bundlings', compact('bundlings', 'vendors', 'rankMap', 'preferences', 'location'));
     }
 
     public function bundlingDetail($id)
@@ -150,7 +218,8 @@ class HomeController extends Controller
 
     public function vendors(Request $request)
     {
-        $query = Vendor::with(['reviews', 'galleries', 'bundlings']);
+        $query = Vendor::where('status', 'approved')
+            ->with(['reviews', 'galleries', 'bundlings']);
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -177,10 +246,14 @@ class HomeController extends Controller
     {
         $preferences = (array) $request->input('preferences', $request->input('preference', []));
         $preferences = array_filter($preferences);
-        $marcosData = $this->marcosService->calculateRanking($preferences);
-        $criterias = Criteria::orderBy('code')->get();
+        $location = $request->input('location', $request->input('wilayah', $request->input('lokasi')));
+        $strictLocation = $request->boolean('strict_location');
 
-        return view('marketplace.spk-marcos', compact('marcosData', 'preferences', 'criterias'));
+        $marcosData = $this->marcosService->calculateRanking($preferences, $location, $strictLocation);
+        $criterias = Criteria::orderBy('code')->get();
+        $regions = Vendor::REGIONS;
+
+        return view('marketplace.spk-marcos', compact('marcosData', 'preferences', 'criterias', 'location', 'strictLocation', 'regions'));
     }
 
     public function services(Request $request)

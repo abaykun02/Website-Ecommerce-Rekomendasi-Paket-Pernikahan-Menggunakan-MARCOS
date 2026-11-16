@@ -55,6 +55,46 @@
                         </div>
                     </div>
 
+                    <!-- Wilayah / Kecamatan Acara -->
+                    <div style="margin-bottom: 16px;">
+                        <label class="form-label">Wilayah / Kecamatan / Kabupaten Acara <span style="color: var(--error);">*</span></label>
+                        <select name="event_region" id="event_region_select" class="form-select" required onchange="updateLocationProximityMatch()">
+                            <option value="">-- Pilih Wilayah / Kecamatan Acara --</option>
+                            <option value="Tanjung Morawa" {{ old('event_region') === 'Tanjung Morawa' ? 'selected' : '' }}>Kec. Tanjung Morawa (Kab. Deli Serdang)</option>
+                            <option value="Batang Kuis" {{ old('event_region') === 'Batang Kuis' ? 'selected' : '' }}>Kec. Batang Kuis (Kab. Deli Serdang)</option>
+                            <option value="Lubuk Pakam" {{ old('event_region') === 'Lubuk Pakam' ? 'selected' : '' }}>Kec. Lubuk Pakam (Kab. Deli Serdang)</option>
+                            <option value="Deli Serdang" {{ old('event_region') === 'Deli Serdang' ? 'selected' : '' }}>Kabupaten Deli Serdang (Umum / Sekitarnya)</option>
+                            <option value="Medan" {{ old('event_region') === 'Medan' ? 'selected' : '' }}>Kota Medan</option>
+                            <option value="Kisaran" {{ old('event_region') === 'Kisaran' ? 'selected' : '' }}>Kota Kisaran (Kab. Asahan)</option>
+                            <option value="Binjai" {{ old('event_region') === 'Binjai' ? 'selected' : '' }}>Kota Binjai</option>
+                            <option value="Tebing Tinggi" {{ old('event_region') === 'Tebing Tinggi' ? 'selected' : '' }}>Kota Tebing Tinggi</option>
+                            <option value="Lainnya" {{ old('event_region') === 'Lainnya' ? 'selected' : '' }}>Wilayah Lainnya / Luar Kota</option>
+                        </select>
+                        <span class="caption" style="color: var(--muted); display: block; margin-top: 4px;">
+                            Penting agar sistem mencocokkan kedekatan lokasi vendor & efisiensi transportasi.
+                        </span>
+                    </div>
+
+                    <!-- Live Matching Kedekatan Lokasi Vendor -->
+                    <div id="vendorProximityBox" style="margin-bottom: 16px; padding: 14px 16px; border-radius: 10px; background: #F8FAFC; border: 1px solid #E2E8F0; display: flex; align-items: flex-start; gap: 12px;">
+                        <div id="proxIconContainer" style="width: 32px; height: 32px; border-radius: 8px; background: #E2E8F0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #475569;">
+                            <i data-lucide="map-pin" style="width: 16px; height: 16px;"></i>
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; margin-bottom: 4px;">
+                                <strong style="font-size: 13px; color: #1E293B;">
+                                    Lokasi Vendor: {{ $primaryVendor?->vendor_name ?? 'Vendor' }} <span style="font-weight: 500; color: #64748B;">({{ $primaryVendor?->region ?? 'Deli Serdang' }})</span>
+                                </strong>
+                                <span id="proxBadge" class="badge" style="background: #E2E8F0; color: #475569; font-size: 11px;">
+                                    Pilih Wilayah Acara
+                                </span>
+                            </div>
+                            <div id="proxDescription" style="font-size: 12px; color: #64748B; line-height: 1.4;">
+                                Pilih wilayah pelaksanaan acara di atas untuk mencocokkan estimasi jarak dan ongkir transportasi.
+                            </div>
+                        </div>
+                    </div>
+
                     <div style="margin-bottom: 16px;">
                         <label class="form-label">Alamat Lengkap Venue / Lokasi Acara <span style="color: var(--error);">*</span></label>
                         <textarea name="event_location" class="form-textarea" rows="3" placeholder="Masukkan gedung, nama jalan, nomor rumah, kelurahan, kecamatan, dan kota..." required>{{ old('event_location', $user->address) }}</textarea>
@@ -78,7 +118,7 @@
                             <input type="radio" name="payment_type" value="full_payment" checked style="margin-top: 3px;" onchange="updatePaymentCalculation()">
                             <div>
                                 <strong style="display: block; font-size: 0.95rem; color: var(--ink);">Pelunasan Penuh (100%)</strong>
-                                <span class="caption" style="color: var(--muted);">Bayar lunas seluruh total biaya transaksi sekarang via Midtrans (BCA, Mandiri, BRI, QRIS, GoPay, Kartu Kredit).</span>
+                                <span class="caption" style="color: var(--muted);">Bayar lunas seluruh total biaya transaksi melalui transfer bank manual atau opsi payment gateway otomatis.</span>
                             </div>
                         </label>
 
@@ -146,12 +186,12 @@
                 </div>
 
                 <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 13px; font-size: 0.95rem; margin-top: 8px;">
-                    <i data-lucide="credit-card" style="width: 16px; height: 16px;"></i>
-                    Buat Pesanan & Bayar via Midtrans
+                    <i data-lucide="check-circle" style="width: 16px; height: 16px;"></i>
+                    Konfirmasi & Buat Pesanan
                 </button>
 
                 <p class="caption" style="text-align: center; margin-top: 12px; line-height: 1.4;">
-                    Dengan menekan tombol di atas, pesanan akan diteruskan ke vendor dan pop-up pembayaran otomatis Midtrans akan ditampilkan.
+                    Pesanan Anda akan langsung diteruskan ke mitra vendor untuk diverifikasi. Anda dapat menyelesaikan pembayaran melalui transfer bank manual atau menggunakan payment gateway otomatis.
                 </p>
             </div>
         </div>
@@ -186,9 +226,84 @@
             dpRow.style.display = 'none';
             totalPayableText.textContent = 'Rp ' + totalOrderAmount.toLocaleString('id-ID');
         }
+    const vendorRegion = "{{ $primaryVendor?->region ?? 'Deli Serdang' }}";
+
+    function updateLocationProximityMatch() {
+        const select = document.getElementById('event_region_select');
+        const box = document.getElementById('vendorProximityBox');
+        const badge = document.getElementById('proxBadge');
+        const desc = document.getElementById('proxDescription');
+        const iconContainer = document.getElementById('proxIconContainer');
+
+        if (!select || !select.value) {
+            badge.textContent = 'Pilih Wilayah Acara';
+            badge.style.background = '#E2E8F0';
+            badge.style.color = '#475569';
+            desc.textContent = 'Pilih wilayah pelaksanaan acara di atas untuk mencocokkan estimasi jarak dan ongkir transportasi.';
+            return;
+        }
+
+        const customerRegion = select.value;
+
+        if (customerRegion === vendorRegion) {
+            box.style.background = '#DCFCE7';
+            box.style.borderColor = '#86EFAC';
+            badge.textContent = 'Satu Wilayah / Sangat Dekat (< 5 km)';
+            badge.style.background = '#166534';
+            badge.style.color = '#FFFFFF';
+            desc.innerHTML = '<strong style="color: #166534;">Sempurna!</strong> Lokasi acara berada di satu area utama vendor (<strong>' + vendorRegion + '</strong>). Bebas biaya transportasi luar kota & respon kedatangan tercepat.';
+            iconContainer.style.background = '#BBF7D0';
+            iconContainer.style.color = '#166534';
+        } else if ((vendorRegion === 'Tanjung Morawa' && customerRegion === 'Batang Kuis') || 
+                   (vendorRegion === 'Batang Kuis' && customerRegion === 'Tanjung Morawa') ||
+                   (customerRegion === 'Deli Serdang' && (vendorRegion === 'Tanjung Morawa' || vendorRegion === 'Batang Kuis'))) {
+            box.style.background = '#E0F2FE';
+            box.style.borderColor = '#7DD3FC';
+            badge.textContent = 'Wilayah Bersebelahan / Dekat (~10-15 km)';
+            badge.style.background = '#0369A1';
+            badge.style.color = '#FFFFFF';
+            desc.innerHTML = 'Jarak sangat dekat antar-kecamatan di Deli Serdang. Akses jalan cepat dan efisien.';
+            iconContainer.style.background = '#BAE6FD';
+            iconContainer.style.color = '#0369A1';
+        } else if ((vendorRegion === 'Medan' && (customerRegion === 'Tanjung Morawa' || customerRegion === 'Batang Kuis' || customerRegion === 'Deli Serdang')) ||
+                   (customerRegion === 'Medan' && (vendorRegion === 'Tanjung Morawa' || vendorRegion === 'Batang Kuis' || vendorRegion === 'Deli Serdang'))) {
+            box.style.background = '#FEF9C3';
+            box.style.borderColor = '#FDE047';
+            badge.textContent = 'Jarak Menengah (~20-25 km)';
+            badge.style.background = '#854D0E';
+            badge.style.color = '#FFFFFF';
+            desc.innerHTML = 'Jarak menengah via jalan arteri / tol. Vendor dapat melayani acara Anda tepat waktu.';
+            iconContainer.style.background = '#FEF08A';
+            iconContainer.style.color = '#854D0E';
+        } else if (vendorRegion === 'Kisaran' || customerRegion === 'Kisaran' || customerRegion === 'Lainnya') {
+            box.style.background = '#FEE2E2';
+            box.style.borderColor = '#FCA5A5';
+            badge.textContent = 'Luar Kota / Jarak Jauh (> 100 km)';
+            badge.style.background = '#991B1B';
+            badge.style.color = '#FFFFFF';
+            desc.innerHTML = '<strong style="color: #991B1B;">Luar Kota:</strong> Jarak vendor cukup jauh dari lokasi acara (~135-155 km). Tim vendor mungkin memerlukan biaya akomodasi/transportasi tambahan yang dapat dikoordinasikan via Chat.';
+            iconContainer.style.background = '#FECACA';
+            iconContainer.style.color = '#991B1B';
+        } else {
+            box.style.background = '#F1F5F9';
+            box.style.borderColor = '#CBD5E1';
+            badge.textContent = 'Jarak Regional Standar';
+            badge.style.background = '#475569';
+            badge.style.color = '#FFFFFF';
+            desc.innerHTML = 'Vendor dapat menjangkau wilayah acara Anda dengan konfirmasi jadwal lebih awal.';
+            iconContainer.style.background = '#E2E8F0';
+            iconContainer.style.color = '#475569';
+        }
+
+        if (window.lucide) {
+            lucide.createIcons();
+        }
     }
 
-    document.addEventListener('DOMContentLoaded', updatePaymentCalculation);
+    document.addEventListener('DOMContentLoaded', function() {
+        updatePaymentCalculation();
+        updateLocationProximityMatch();
+    });
 </script>
 @endpush
 @endsection

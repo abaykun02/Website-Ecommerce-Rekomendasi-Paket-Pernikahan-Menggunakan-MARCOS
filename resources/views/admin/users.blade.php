@@ -85,7 +85,7 @@
                             <td>{{ $user->phone ?: '-' }}</td>
                             <td>
                                 @if($user->vendor)
-                                    <a href="{{ route('vendor.detail', $user->vendor->id) }}" target="_blank" style="font-weight: 600; color: var(--primary);">
+                                    <a href="{{ route('vendor.detail', $user->vendor->id) }}" style="font-weight: 600; color: var(--primary);">
                                         {{ $user->vendor->vendor_name }}
                                     </a>
                                 @else
@@ -117,7 +117,7 @@
                                     @if($user->id !== auth()->id())
                                         <!-- Toggle Status Form -->
                                         <form action="{{ route('admin.user.toggle-status', $user->id) }}" method="POST" style="margin: 0;"
-                                              onsubmit="return confirm('{{ $user->is_active ? 'Yakin ingin menonaktifkan akun '.$user->name.'?' : 'Aktifkan kembali akun '.$user->name.'?' }}');">
+                                              onsubmit="return confirmAction(event, this, '{{ $user->is_active ? 'Yakin ingin menonaktifkan akun '.$user->name.'?' : 'Aktifkan kembali akun '.$user->name.'?' }}', 'Konfirmasi Status Pengguna', '{{ $user->is_active ? 'Ya, Nonaktifkan' : 'Ya, Aktifkan' }}');">
                                             @csrf
                                             <button type="submit" class="btn btn-sm" 
                                                     style="height: 30px; padding: 0 10px; font-size: 11.5px; border-radius: 6px; border: 1px solid {{ $user->is_active ? '#F59E0B' : '#10B981' }}; color: {{ $user->is_active ? '#B45309' : '#047857' }}; background-color: {{ $user->is_active ? '#FFFBEB' : '#ECFDF5' }};">
@@ -128,7 +128,7 @@
 
                                         <!-- Delete Form -->
                                         <form action="{{ route('admin.user.delete', $user->id) }}" method="POST" style="margin: 0;"
-                                              onsubmit="return confirm('Peringatan: Yakin ingin menghapus akun {{ $user->name }} secara permanen?');">
+                                              onsubmit="return confirmDelete(event, this, 'Peringatan: Yakin ingin menghapus akun {{ $user->name }} secara permanen?');">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-sm" 

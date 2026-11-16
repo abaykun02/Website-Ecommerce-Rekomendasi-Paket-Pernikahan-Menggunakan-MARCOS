@@ -24,12 +24,6 @@
                 <span>Ekspor Excel (.csv)</span>
             </a>
 
-            <!-- Quick Import Shortcut -->
-            <a href="{{ route('admin.evaluations') }}" class="btn btn-secondary btn-sm" title="Kelola / Import nilai evaluasi baru">
-                <span class="material-symbols-outlined" style="font-size: 16px; color: var(--primary);">upload_file</span>
-                <span>Import Skor Baru</span>
-            </a>
-
             <a href="{{ route('admin.spk.print-pdf') }}" target="_blank" class="btn btn-secondary btn-sm" title="Buka cetak laporan resmi A4 dengan kop surat Glow & Grace">
                 <i data-lucide="printer" style="width: 14px; height: 14px;"></i>
                 <span>Cetak PDF Laporan Resmi</span>
@@ -61,13 +55,14 @@
                 <thead>
                     <tr>
                         <th style="width: 70px; text-align: center;">Peringkat</th>
+                        <th style="width: 70px; text-align: center;">Kode</th>
                         <th>Nama Paket Bundling</th>
                         <th>Vendor</th>
                         <th>Harga</th>
                         <th>Total Nilai Terbobot</th>
                         <th>Nilai Utilitas Anti-Ideal</th>
                         <th>Nilai Utilitas Ideal</th>
-                        <th>Nilai Rekomendasi Akhir</th>
+                        <th>Nilai Akhir</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -78,15 +73,22 @@
                                     #{{ $r['rank'] }}
                                 </span>
                             </td>
+                            <td style="text-align: center;">
+                                @if(!empty($r['code']))
+                                    <span style="font-weight: 700; background: #0D0C22; color: #FFF; padding: 2px 7px; border-radius: 4px; font-size: 11px;">{{ $r['code'] }}</span>
+                                @else
+                                    <span class="badge badge-muted">-</span>
+                                @endif
+                            </td>
                             <td><strong>{{ $r['package_name'] }}</strong></td>
                             <td>{{ $r['vendor_name'] }}</td>
                             <td>Rp {{ number_format($r['price'], 0, ',', '.') }}</td>
-                            <td><code>{{ number_format($r['S_i'], 4) }}</code></td>
-                            <td><code>{{ number_format($r['K_minus'], 4) }}</code></td>
-                            <td><code>{{ number_format($r['K_plus'], 4) }}</code></td>
+                            <td><code>{{ number_format($r['S_i'], 6) }}</code></td>
+                            <td><code>{{ number_format($r['K_minus'], 6) }}</code></td>
+                            <td><code>{{ number_format($r['K_plus'], 6) }}</code></td>
                             <td>
                                 <strong style="color: var(--color-highlight); font-size: 13.5px;">
-                                    {{ number_format($r['final_score'], 5) }}
+                                    {{ number_format($r['final_score'], 6) }}
                                 </strong>
                             </td>
                         </tr>
@@ -165,6 +167,7 @@
             <table class="table-dribbble">
                 <thead>
                     <tr>
+                        <th style="width: 70px; text-align: center;">Kode</th>
                         <th>Paket Alternatif</th>
                         @foreach($marcosData['criterias'] ?? [] as $c)
                             <th style="text-align: center;">{{ $c->code }} ({{ ucfirst($c->type) }})</th>
@@ -174,6 +177,13 @@
                 <tbody>
                     @foreach($marcosData['bundlings'] ?? [] as $b)
                         <tr>
+                            <td style="text-align: center;">
+                                @if(!empty($b->code))
+                                    <span style="font-weight: 700; background: #0D0C22; color: #FFF; padding: 2px 7px; border-radius: 4px; font-size: 11px;">{{ $b->code }}</span>
+                                @else
+                                    <span class="badge badge-muted">-</span>
+                                @endif
+                            </td>
                             <td><strong>{{ $b->package_name }}</strong></td>
                             @foreach($marcosData['criterias'] ?? [] as $c)
                                 <td style="text-align: center;">
@@ -205,6 +215,7 @@
             <table class="table-dribbble">
                 <thead>
                     <tr>
+                        <th style="width: 70px; text-align: center;">Kode</th>
                         <th>Paket Alternatif</th>
                         @foreach($marcosData['criterias'] ?? [] as $c)
                             <th style="text-align: center;">{{ $c->code }}</th>
@@ -214,6 +225,13 @@
                 <tbody>
                     @foreach($marcosData['bundlings'] ?? [] as $b)
                         <tr>
+                            <td style="text-align: center;">
+                                @if(!empty($b->code))
+                                    <span style="font-weight: 700; background: #0D0C22; color: #FFF; padding: 2px 7px; border-radius: 4px; font-size: 11px;">{{ $b->code }}</span>
+                                @else
+                                    <span class="badge badge-muted">-</span>
+                                @endif
+                            </td>
                             <td><strong>{{ $b->package_name }}</strong></td>
                             @foreach($marcosData['criterias'] ?? [] as $c)
                                 <td style="text-align: center;">
@@ -245,11 +263,12 @@
             <table class="table-dribbble">
                 <thead>
                     <tr>
+                        <th style="width: 70px; text-align: center;">Kode</th>
                         <th>Paket Alternatif</th>
                         @foreach($marcosData['criterias'] ?? [] as $c)
                             <th style="text-align: center;">{{ $c->code }}</th>
                         @endforeach
-                        <th style="text-align: center;">Total Nilai Terbobot</th>
+                        <th style="text-align: center;">Total Nilai Terbobot ($S_i$)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -258,6 +277,13 @@
                             $si = array_sum($marcosData['weighted'][$b->id] ?? []);
                         @endphp
                         <tr>
+                            <td style="text-align: center;">
+                                @if(!empty($b->code))
+                                    <span style="font-weight: 700; background: #0D0C22; color: #FFF; padding: 2px 7px; border-radius: 4px; font-size: 11px;">{{ $b->code }}</span>
+                                @else
+                                    <span class="badge badge-muted">-</span>
+                                @endif
+                            </td>
                             <td><strong>{{ $b->package_name }}</strong></td>
                             @foreach($marcosData['criterias'] ?? [] as $c)
                                 <td style="text-align: center;">
@@ -265,7 +291,7 @@
                                 </td>
                             @endforeach
                             <td style="text-align: center;">
-                                <strong>{{ number_format($si, 4) }}</strong>
+                                <strong>{{ number_format($si, 6) }}</strong>
                             </td>
                         </tr>
                     @endforeach
@@ -323,13 +349,14 @@
                     <tr>
                         <th class="excel-row-header"></th>
                         <th>A<br><span style="font-size: 10px; font-weight: normal;">Rank</span></th>
-                        <th>B<br><span style="font-size: 10px; font-weight: normal;">Nama Paket</span></th>
-                        <th>C<br><span style="font-size: 10px; font-weight: normal;">Vendor</span></th>
-                        <th>D<br><span style="font-size: 10px; font-weight: normal;">Harga (Rp)</span></th>
-                        <th>E<br><span style="font-size: 10px; font-weight: normal;">S_i (Terbobot)</span></th>
-                        <th>F<br><span style="font-size: 10px; font-weight: normal;">K^- (Anti-Ideal)</span></th>
-                        <th>G<br><span style="font-size: 10px; font-weight: normal;">K^+ (Ideal)</span></th>
-                        <th>H<br><span style="font-size: 10px; font-weight: normal;">f(K_i) Skor Akhir</span></th>
+                        <th>B<br><span style="font-size: 10px; font-weight: normal;">Kode</span></th>
+                        <th>C<br><span style="font-size: 10px; font-weight: normal;">Nama Paket</span></th>
+                        <th>D<br><span style="font-size: 10px; font-weight: normal;">Vendor</span></th>
+                        <th>E<br><span style="font-size: 10px; font-weight: normal;">Harga (Rp)</span></th>
+                        <th>F<br><span style="font-size: 10px; font-weight: normal;">S_i (Terbobot)</span></th>
+                        <th>G<br><span style="font-size: 10px; font-weight: normal;">K^- (Anti-Ideal)</span></th>
+                        <th>H<br><span style="font-size: 10px; font-weight: normal;">K^+ (Ideal)</span></th>
+                        <th>I<br><span style="font-size: 10px; font-weight: normal;">f(K_i) Skor Akhir</span></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -339,14 +366,17 @@
                             <td class="excel-cell" data-coord="A{{ $idx + 1 }}" style="text-align: center; font-weight: 700; color: {{ $r['rank'] == 1 ? '#8C6B28' : '#323130' }};">
                                 #{{ $r['rank'] }}
                             </td>
-                            <td class="excel-cell" data-coord="B{{ $idx + 1 }}" style="font-weight: 600;">{{ $r['package_name'] }}</td>
-                            <td class="excel-cell" data-coord="C{{ $idx + 1 }}">{{ $r['vendor_name'] }}</td>
-                            <td class="excel-cell" data-coord="D{{ $idx + 1 }}" style="text-align: right;">{{ number_format($r['price'], 0, ',', '.') }}</td>
-                            <td class="excel-cell" data-coord="E{{ $idx + 1 }}" style="text-align: right;">{{ number_format($r['S_i'], 4) }}</td>
-                            <td class="excel-cell" data-coord="F{{ $idx + 1 }}" style="text-align: right;">{{ number_format($r['K_minus'], 4) }}</td>
-                            <td class="excel-cell" data-coord="G{{ $idx + 1 }}" style="text-align: right;">{{ number_format($r['K_plus'], 4) }}</td>
-                            <td class="excel-cell" data-coord="H{{ $idx + 1 }}" style="text-align: right; font-weight: 700; color: #107C41;">
-                                {{ number_format($r['final_score'], 5) }}
+                            <td class="excel-cell" data-coord="B{{ $idx + 1 }}" style="text-align: center; font-weight: 700;">
+                                {{ $r['code'] ?? '-' }}
+                            </td>
+                            <td class="excel-cell" data-coord="C{{ $idx + 1 }}" style="font-weight: 600;">{{ $r['package_name'] }}</td>
+                            <td class="excel-cell" data-coord="D{{ $idx + 1 }}">{{ $r['vendor_name'] }}</td>
+                            <td class="excel-cell" data-coord="E{{ $idx + 1 }}" style="text-align: right;">{{ number_format($r['price'], 0, ',', '.') }}</td>
+                            <td class="excel-cell" data-coord="F{{ $idx + 1 }}" style="text-align: right;">{{ number_format($r['S_i'], 6) }}</td>
+                            <td class="excel-cell" data-coord="G{{ $idx + 1 }}" style="text-align: right;">{{ number_format($r['K_minus'], 6) }}</td>
+                            <td class="excel-cell" data-coord="H{{ $idx + 1 }}" style="text-align: right;">{{ number_format($r['K_plus'], 6) }}</td>
+                            <td class="excel-cell" data-coord="I{{ $idx + 1 }}" style="text-align: right; font-weight: 700; color: #107C41;">
+                                {{ number_format($r['final_score'], 6) }}
                             </td>
                         </tr>
                     @endforeach

@@ -23,6 +23,7 @@ class Order extends Model
         'event_date',
         'event_time',
         'event_location',
+        'event_region',
         'total_price',
         'payment_type',
         'dp_amount',
@@ -140,5 +141,17 @@ class Order extends Model
             'cancelled' => 'Dibatalkan',
             default => $this->status,
         };
+    }
+
+    /**
+     * Proximity matching between vendor and order's event region
+     */
+    public function getProximityAttribute(): ?array
+    {
+        if (!$this->vendor) {
+            return null;
+        }
+        $region = $this->event_region ?: Vendor::normalizeRegionName($this->event_location);
+        return $this->vendor->getProximityTo($region);
     }
 }
